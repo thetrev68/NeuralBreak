@@ -1,0 +1,85 @@
+# Generic
+.DS_Store
+.env
+.idea/
+.vscode/
+.history/
+build/
+*.iml
+*.ipr
+*.iws
+*.bak
+*.scc
+*.suo
+*.user
+*.vspscc
+*.vssscc
+*.buildlog
+*.docstates
+
+# Dart/Flutter
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.gradle
+.cxx/
+**/.classpath
+**/.project
+**/.settings
+**/.external_build
+**/.idea
+**/.ios/
+**/.android/
+**/.venv/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.nyc_output/
+**/.tox/
+**/.coverage
+**/.coverage.*
+**/.cache
+**/.pub-cache/
+**/.git/COMMIT_EDITMSG
+**/.git/index.lock
+**/.git/ORIG_HEAD
+**/.git/logs/
+
+# macOS specific
+.DS_Store
+
+# VS Code specific
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Android specific
+*.apk
+*.ap_
+*.aab
+*.aar
+*.dex
+*.i.jar
+*.o.jar
+*.so
+*.rc
+
+# iOS specific
+*.ipa
+*.xcarchive
+*.app
+*.dSYM
+*.framework
+*.dylib
+*.pbd
+*.xcode
+
+# IDE files
+*.iml
+.idea/
+.gradle/
+build/
