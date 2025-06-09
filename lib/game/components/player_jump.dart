@@ -13,10 +13,14 @@ mixin PlayerJump on PositionComponent implements HasGameRef<NeuralBreakGame> {
 
   // Public getter to expose the groundY to other mixins/classes that need it.
   double get groundY => _groundY;
+  // Public getter to expose the jumping state.
+  bool get isJumping => _isJumping;
 
   // This method should be called once from the Player's onLoad to set the initial ground level.
   void initializeJump() {
     _groundY = position.y; // The initial Y position is our ground
+    _isJumping = false; // Ensure not jumping on init
+    _yVelocity = 0.0; // Ensure no initial velocity
   }
 
   // Call this to initiate a jump
@@ -47,7 +51,11 @@ mixin PlayerJump on PositionComponent implements HasGameRef<NeuralBreakGame> {
     }
   }
 
-  // You might need a getter for _isJumping if other parts of the game
-  // need to know if the player is in the air (e.g., for animations).
-  bool get isJumping => _isJumping;
+  // New method to stop jumping and reset state
+  void stopJump() {
+    _isJumping = false;
+    _yVelocity = 0.0;
+    // Do not set position.y here, let Player.reset handle full position reset
+    print('Player jump stopped.');
+  }
 }

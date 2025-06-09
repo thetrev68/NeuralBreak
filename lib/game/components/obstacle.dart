@@ -25,22 +25,24 @@ class Obstacle extends PositionComponent with HasGameRef<NeuralBreakGame> {
   @override
   void update(double dt) {
     super.update(dt);
-    // Move the obstacle downwards (positive Y direction) towards the player.
-    position.y += obstacleSpeed * dt;
+    // Only update if game is playing
+    if (gameRef.gameState == GameState.playing) {
+      // Move the obstacle downwards (positive Y direction) towards the player.
+      position.y += obstacleSpeed * dt;
 
-    // Remove the obstacle once it moves off-screen (past the bottom edge).
-    // If Anchor is center, position.y is the center, so add half the height
-    // to get the bottom edge, then check if it's below game height.
-    if (position.y - size.y / 2 > gameRef.size.y) {
-      removeFromParent();
-      print('Obstacle removed: $this');
+      // Remove the obstacle once it moves off-screen (past the bottom edge).
+      // If Anchor is center, position.y is the center, so add half the height
+      // to get the bottom edge, then check if it's below game height.
+      if (position.y - size.y / 2 > gameRef.size.y) {
+        removeFromParent();
+        print('Obstacle removed: $this');
+      }
     }
   }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    // Draw the obstacle as a filled rectangle.
     canvas.drawRect(size.toRect(), _paint);
   }
 }

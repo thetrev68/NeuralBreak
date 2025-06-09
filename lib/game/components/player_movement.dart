@@ -7,16 +7,15 @@ import 'package:neural_break/game/util/game_constants.dart';
 // It requires the component to have a reference to NeuralBreakGame (via HasGameRef).
 mixin PlayerMovement on PositionComponent implements HasGameRef<NeuralBreakGame> {
   // Properties for movement
-  // Expose _targetX as a public getter for the Player class to read
-  double _internalTargetX = 0.0; // Make the internal variable explicitly private
-  double get targetX => _internalTargetX; // Public getter for Player to read
+  double _internalTargetX = 0.0;
+  double get targetX => _internalTargetX;
 
   GameLane _currentLane = GameLane.center;
 
   // Method to be called by the game to set initial position
   void initializeMovement() {
+    _currentLane = GameLane.center; // Reset current lane to center
     _internalTargetX = getLaneX(_currentLane, gameRef.size.x);
-    // Set the position.x here, as this mixin owns the _internalTargetX logic
     position.x = _internalTargetX;
   }
 
@@ -69,6 +68,13 @@ mixin PlayerMovement on PositionComponent implements HasGameRef<NeuralBreakGame>
   // Private helper to update the target X based on current lane
   void _updateTargetX() {
     _internalTargetX = getLaneX(_currentLane, gameRef.size.x);
-    print('Updated Target X: ${_internalTargetX.toStringAsFixed(2)} for lane: $_currentLane');
+  }
+
+  // New method to stop horizontal movement
+  void stopMovement() {
+    _currentLane = GameLane.center;
+    _internalTargetX = getLaneX(_currentLane, gameRef.size.x);
+    position.x = _internalTargetX; // Snap to center
+    print('Player movement stopped and reset to center lane.');
   }
 }

@@ -15,24 +15,29 @@ mixin PlayerSlide on PositionComponent implements HasGameRef<NeuralBreakGame>, P
   // Store the original player size to revert after sliding.
   late Vector2 _originalPlayerSize;
 
+  // Public getter for slide state
+  bool get isSliding => _isSliding;
+
   // This method should be called once from the Player's onLoad to set the initial size.
   void initializeSlide() {
     // Store the player's initial size as its "original" size.
     _originalPlayerSize = Vector2.copy(size);
+    _isSliding = false; // Ensure not sliding on init
+    _slideTimer = 0.0; // Ensure timer is reset
   }
 
   // Call this to initiate a slide.
   void applySlide() {
     // Only allow sliding if not already sliding or jumping.
     // Access `isJumping` and `groundY` directly since PlayerSlide now `on` PlayerJump.
-    if (!_isSliding && !isJumping) { //
+    if (!_isSliding && !isJumping) {
       _isSliding = true;
       _slideTimer = slideDuration; // Start the timer for the slide duration.
       // Adjust the player's size to simulate a slide/duck.
       size.setValues(playerSlideWidth, playerSlideHeight);
       // Adjust position to keep the bottom of the player at the same Y-level.
       // This makes the slide look like the player is ducking down, not moving upwards.
-      position.y = groundY + _originalPlayerSize.y - size.y; //
+      position.y = groundY + _originalPlayerSize.y - size.y;
       print('Slide applied! Player size: $size');
     } else {
       print('Cannot slide, already sliding or jumping.');
@@ -49,12 +54,18 @@ mixin PlayerSlide on PositionComponent implements HasGameRef<NeuralBreakGame>, P
         // Revert player size back to original.
         size.setValues(_originalPlayerSize.x, _originalPlayerSize.y);
         // Revert player position back to original ground Y.
-        position.y = groundY; //
+        position.y = groundY;
         print('Slide ended. Player size: $size');
       }
     }
   }
 
-  // Getter to check if the player is currently sliding.
-  bool get isSliding => _isSliding;
+  // New method to stop sliding and reset state
+  void stopSlide() {
+    _isSliding = false;
+    _slideTimer = 0.0;
+    size.setValues(_originalPlayerSize.x, _originalPlayerSize.y); // Revert size
+    // Do not set position.y here, let Player.reset handle full position reset
+    print('Player slide stopped.');
+  }
 }
