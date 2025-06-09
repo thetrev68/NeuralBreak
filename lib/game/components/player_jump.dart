@@ -11,6 +11,9 @@ mixin PlayerJump on PositionComponent implements HasGameRef<NeuralBreakGame> {
   bool _isJumping = false;
   double _groundY = 0.0; // The Y position where the player is considered "grounded"
 
+  // Public getter to expose the groundY to other mixins/classes that need it.
+  double get groundY => _groundY;
+
   // This method should be called once from the Player's onLoad to set the initial ground level.
   void initializeJump() {
     _groundY = position.y; // The initial Y position is our ground

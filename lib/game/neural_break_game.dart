@@ -4,10 +4,12 @@ import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 
 import 'package:neural_break/game/components/player.dart';
-import 'package:neural_break/game/util/game_constants.dart'; // Import constants for jumpTapZoneWidth
+import 'package:neural_break/game/components/obstacle_spawner.dart'; // Import the new spawner
+import 'package:neural_break/game/util/game_constants.dart';
 
 class NeuralBreakGame extends FlameGame with TapCallbacks {
   late final Player player;
+  late final ObstacleSpawner obstacleSpawner; // Declare the spawner
 
   @override
   Color backgroundColor() => Colors.black;
@@ -19,7 +21,10 @@ class NeuralBreakGame extends FlameGame with TapCallbacks {
     player = Player();
     add(player);
 
-    print('NeuralBreakGame loaded and Player added!');
+    obstacleSpawner = ObstacleSpawner(); // Initialize the spawner
+    add(obstacleSpawner); // Add the spawner to the game
+
+    print('NeuralBreakGame loaded and Player and ObstacleSpawner added!');
   }
 
   @override
@@ -30,22 +35,26 @@ class NeuralBreakGame extends FlameGame with TapCallbacks {
   @override
   void onTapDown(TapDownEvent event) {
     final tapX = event.canvasPosition.x;
+    final tapY = event.canvasPosition.y;
     final playerCenterX = player.position.x;
+    final playerCenterY = player.position.y;
 
-    // Calculate the left and right boundaries of the jump tap zone
     final jumpZoneLeft = playerCenterX - (jumpTapZoneWidth / 2);
     final jumpZoneRight = playerCenterX + (jumpTapZoneWidth / 2);
 
-    if (tapX >= jumpZoneLeft && tapX <= jumpZoneRight) {
-      // Tapped within the horizontal zone above the player (jump area)
+    final slideZoneTop = playerCenterY + player.size.y / 2;
+    final slideZoneBottom = slideZoneTop + slideTapZoneHeight;
+
+    if (tapX >= jumpZoneLeft && tapX <= jumpZoneRight && tapY < playerCenterY) {
       player.applyJump();
       print('Jump tap detected. Player Y: ${player.position.y.toStringAsFixed(2)}');
+    } else if (tapX >= jumpZoneLeft && tapX <= jumpZoneRight && tapY > slideZoneTop && tapY < slideZoneBottom) {
+      player.applySlide();
+      print('Slide tap detected. Player Y: ${player.position.y.toStringAsFixed(2)}');
     } else if (tapX < playerCenterX) {
-      // Tapped to the left of the player's center (move left area)
       player.moveLeft();
       print('Move Left tap detected. Player X: ${player.position.x.toStringAsFixed(2)}');
     } else {
-      // Tapped to the right of the player's center (move right area)
       player.moveRight();
       print('Move Right tap detected. Player X: ${player.position.x.toStringAsFixed(2)}');
     }
