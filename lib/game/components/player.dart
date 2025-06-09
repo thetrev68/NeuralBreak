@@ -1,17 +1,16 @@
 // lib/game/components/player.dart
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:flame/collisions.dart'; // New import for CollisionCallbacks
+import 'package:flame/collisions.dart'; // Import for RectangleHitbox
 
 import 'package:neural_break/game/neural_break_game.dart';
 import 'package:neural_break/game/util/game_constants.dart';
 import 'package:neural_break/game/components/player_movement.dart';
 import 'package:neural_break/game/components/player_jump.dart';
 import 'package:neural_break/game/components/player_slide.dart';
-import 'package:neural_break/game/components/obstacle.dart'; // New import to detect collision with obstacles
+import 'package:neural_break/game/components/obstacle.dart';
 
-// Add CollisionCallbacks mixin
-class Player extends PositionComponent with HasGameRef<NeuralBreakGame>, PlayerMovement, PlayerJump, PlayerSlide, CollisionCallbacks { // Added CollisionCallbacks
+class Player extends PositionComponent with HasGameReference<NeuralBreakGame>, PlayerMovement, PlayerJump, PlayerSlide, CollisionCallbacks { // ADDED CollisionCallbacks
   static final _playerPaint = Paint()
     ..color = Colors.white
     ..style = PaintingStyle.fill;
@@ -28,26 +27,24 @@ class Player extends PositionComponent with HasGameRef<NeuralBreakGame>, PlayerM
     // Initialize horizontal movement
     initializeMovement();
     // Set initial Y position. X is handled by initializeMovement
-    position.y = gameRef.size.y - size.y * 2;
+    position.y = game.size.y - size.y * 2; // Correct: Use 'game'
 
     // Initialize jump mechanics with the current ground position
     initializeJump();
     // Initialize slide mechanics
     initializeSlide();
 
-    add(RectangleHitbox()); // Add a hitbox for collision detection
-
-    print('Player loaded. Initial X: ${position.x.toStringAsFixed(2)}, Target X: ${targetX.toStringAsFixed(2)}, Initial Y: ${position.y.toStringAsFixed(2)}');
+    // Add a RectangleHitbox for collision detection
+    add(RectangleHitbox());
+    print('Player: onLoad completed. Position: ${position.x.toStringAsFixed(2)}, ${position.y.toStringAsFixed(2)}'); // DIAGNOSTIC PRINT
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    if (gameRef.gameState == GameState.playing) { // Only update if game is playing
-      updateMovement(dt);
-      updateJump(dt);
-      updateSlide(dt);
-    }
+    updateMovement(dt);
+    updateJump(dt);
+    updateSlide(dt);
   }
 
   @override
@@ -58,33 +55,29 @@ class Player extends PositionComponent with HasGameRef<NeuralBreakGame>, PlayerM
 
   @override
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
-    super.onCollisionStart(intersectionPoints, other);
+    // Collision logic for the player.
     if (other is Obstacle) {
-      gameRef.gameOver(); // Trigger game over when player collides with an obstacle
-      print('Player collided with Obstacle!');
+      game.loseLife(); // Correct: Use 'game'
+      other.removeFromParent(); // Immediately remove the collided obstacle
+      print('Player: Collided with obstacle ${other.runtimeType}. Intersection points: $intersectionPoints'); // DIAGNOSTIC PRINT
     }
   }
 
-  // New method to reset player state for a new game
+  // Resets player state for a new game
   void reset() {
-    // Reset position to initial state
-    position.setValues(getLaneX(GameLane.center, gameRef.size.x), gameRef.size.y - size.y * 2);
+    resetMovement();
+    resetJump();
+    resetSlide();
 
-    // Re-initialize mixins to reset their internal states
-    initializeMovement();
-    initializeJump();
-    initializeSlide();
-
-    // Stop any ongoing actions
-    stopAllActions();
-    print('Player reset to initial state.');
+    position.y = game.size.y - size.y * 2; // Correct: Use 'game'
+    print('Player: Reset completed. Position: ${position.x.toStringAsFixed(2)}, ${position.y.toStringAsFixed(2)}'); // DIAGNOSTIC PRINT
   }
 
-  // New method to stop all player actions
+  // Method to stop all player actions (movement, jump, slide)
   void stopAllActions() {
     stopMovement();
     stopJump();
     stopSlide();
-    print('All player actions stopped.');
+    print('Player: All actions stopped.'); // DIAGNOSTIC PRINT
   }
 }

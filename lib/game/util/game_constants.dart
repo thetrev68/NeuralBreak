@@ -16,6 +16,15 @@ const double slideDuration = 0.5; // How long the slide animation lasts in secon
 const double playerSlideHeight = 20.0; // Player height when sliding
 const double playerSlideWidth = 60.0; // Player width when sliding
 
+// Game mechanics constants (NEW)
+const int initialLives = 3;
+const int scorePerObstacle = 10;
+const int levelUpScoreThreshold = 50; // Score required to advance to the next level
+const double initialObstacleSpeed = 200.0; // Starting speed for obstacles
+const double obstacleSpeedIncreasePerLevel = 50.0; // How much speed increases per level
+const double initialSpawnInterval = 2.0; // Initial time between obstacle spawns
+const double spawnIntervalDecreasePerLevel = 0.2; // How much spawn interval decreases per level
+const double minSpawnInterval = 0.5; // Minimum possible spawn interval
 
 // Lane definitions
 enum GameLane { left, center, right }

@@ -5,32 +5,30 @@ import 'package:neural_break/game/util/game_constants.dart';
 
 // This mixin adds jumping capabilities to a PositionComponent.
 // It requires the component to have a reference to NeuralBreakGame and control over its position.
-mixin PlayerJump on PositionComponent implements HasGameRef<NeuralBreakGame> {
+mixin PlayerJump on PositionComponent, HasGameReference<NeuralBreakGame> { // Correct: Use 'on' for HasGameReference
   // Properties for jump state and physics
   double _yVelocity = 0.0;
   bool _isJumping = false;
-  double _groundY = 0.0; // The Y position where the player is considered "grounded"
+  double _groundY = 0.0;
 
   // Public getter to expose the groundY to other mixins/classes that need it.
   double get groundY => _groundY;
-  // Public getter to expose the jumping state.
+
+  // Public getter to expose the jump state (for PlayerSlide)
   bool get isJumping => _isJumping;
 
   // This method should be called once from the Player's onLoad to set the initial ground level.
   void initializeJump() {
-    _groundY = position.y; // The initial Y position is our ground
-    _isJumping = false; // Ensure not jumping on init
-    _yVelocity = 0.0; // Ensure no initial velocity
+    _groundY = position.y;
   }
 
   // Call this to initiate a jump
   void applyJump() {
-    if (!_isJumping) { // Only jump if not already in the air
+    if (!_isJumping) {
       _isJumping = true;
-      _yVelocity = -playerJumpForce; // Negative for upward movement (Flame's Y is inverted)
-      print('Jump applied! Initial Y velocity: $_yVelocity');
+      _yVelocity = -playerJumpForce;
     } else {
-      print('Cannot jump, already in air.');
+      // Nothing to do if already jumping
     }
   }
 
@@ -43,19 +41,23 @@ mixin PlayerJump on PositionComponent implements HasGameRef<NeuralBreakGame> {
 
       // Check if player has landed
       if (position.y >= _groundY) {
-        position.y = _groundY; // Snap to ground
+        position.y = _groundY;
         _isJumping = false;
         _yVelocity = 0.0;
-        print('Player landed. Current Y: ${position.y.toStringAsFixed(2)}');
       }
     }
   }
 
-  // New method to stop jumping and reset state
+  // Resets jump state for a new game
+  void resetJump() {
+    _yVelocity = 0.0;
+    _isJumping = false;
+    position.y = _groundY;
+  }
+
+  // Stops any ongoing jump (e.g., on game over)
   void stopJump() {
     _isJumping = false;
     _yVelocity = 0.0;
-    // Do not set position.y here, let Player.reset handle full position reset
-    print('Player jump stopped.');
   }
 }

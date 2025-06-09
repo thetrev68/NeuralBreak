@@ -3,15 +3,19 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:neural_break/game/neural_break_game.dart';
 import 'package:neural_break/game/components/firewall.dart';
-import 'package:neural_break/game/util/game_constants.dart'; // To access GameLane enum
+import 'package:neural_break/game/util/game_constants.dart';
 
 // Manages the spawning of obstacles in the game.
 // This component will periodically add new obstacles to the game world.
-class ObstacleSpawner extends Component with HasGameRef<NeuralBreakGame> {
+class ObstacleSpawner extends Component with HasGameReference<NeuralBreakGame> { // Correct: Use HasGameReference
   // Timer to control when the next obstacle should spawn.
   late TimerComponent _spawnTimer;
   // Random number generator for selecting lanes and obstacle types.
   final Random _random = Random();
+
+  // New properties for dynamic difficulty
+  double _currentObstacleSpeed = initialObstacleSpeed;
+  double _currentSpawnInterval = initialSpawnInterval;
 
   ObstacleSpawner() : super();
 
@@ -20,45 +24,78 @@ class ObstacleSpawner extends Component with HasGameRef<NeuralBreakGame> {
     await super.onLoad();
 
     // Initialize the spawn timer.
-    _spawnTimer = TimerComponent(
-      period: 2.0, // Spawn an obstacle every 2 seconds
-      autoStart: true,
-      repeat: true,
-      onTick: _spawnObstacle,
-    );
-    add(_spawnTimer);
+    _initializeSpawnTimer();
+    add(_spawnTimer); // Add the timer component to the spawner.
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    // The timer component handles its own updates, no need to manually call _spawnTimer.update(dt)
+    // TimerComponent handles its own update, so no direct update logic needed here
+  }
+
+  // Helper method to initialize the spawn timer with current interval
+  void _initializeSpawnTimer() {
+    _spawnTimer = TimerComponent(
+      period: _currentSpawnInterval,
+      autoStart: true,
+      repeat: true,
+      onTick: _spawnObstacle,
+    );
   }
 
   // This method is called by the timer to create and add a new obstacle.
   void _spawnObstacle() {
+    // Check if the game is playing before spawning obstacles
+    if (game.gameState != GameState.playing) { // Correct: Use 'game'
+      return;
+    }
+
     // Randomly select a lane for the new obstacle.
     final laneIndex = _random.nextInt(GameLane.values.length);
     final lane = GameLane.values[laneIndex];
 
+    // For now, we'll only spawn Firewalls. Later, we can add more obstacle types.
     final newObstacle = Firewall(
       lane: lane,
-      gameWidth: gameRef.size.x,
+      gameWidth: game.size.x, // Correct: Use 'game'
+      obstacleSpeed: _currentObstacleSpeed,
     );
 
-    gameRef.add(newObstacle);
-    print('Spawned Firewall in lane: $lane');
+    // Add the newly created obstacle to the game.
+    game.add(newObstacle); // Correct: Use 'game'
   }
 
-  // New method to stop obstacle spawning
+  // New method: Call this to stop obstacle spawning (e.g., on game over)
   void stopSpawning() {
     _spawnTimer.timer.stop();
-    print('Obstacle spawning stopped.');
   }
 
-  // New method to reset the spawner for a new game
+  // New method: Call this to resume obstacle spawning (e.g., after game over or reset)
+  void startSpawning() {
+    _spawnTimer.timer.start();
+  }
+
+  // New method: Adjusts difficulty based on the current level
+  void increaseDifficulty(int level) {
+    _currentObstacleSpeed = initialObstacleSpeed + (level - 1) * obstacleSpeedIncreasePerLevel;
+    _currentSpawnInterval = initialSpawnInterval - (level - 1) * spawnIntervalDecreasePerLevel;
+    if (_currentSpawnInterval < minSpawnInterval) {
+      _currentSpawnInterval = minSpawnInterval;
+    }
+
+    remove(_spawnTimer);
+    _initializeSpawnTimer();
+    add(_spawnTimer);
+  }
+
+  // Resets spawner to initial state (e.g., for a new game)
   void reset() {
-    _spawnTimer.timer.start(); // Restart the timer
-    print('Obstacle spawner reset and started.');
+    _currentObstacleSpeed = initialObstacleSpeed;
+    _currentSpawnInterval = initialSpawnInterval;
+
+    remove(_spawnTimer);
+    _initializeSpawnTimer();
+    add(_spawnTimer);
   }
 }
