@@ -1,53 +1,51 @@
 // lib/game/components/obstacle.dart
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:flame/collisions.dart'; // NEW: Import for RectangleHitbox
+import 'package:flame/collisions.dart';
 import 'package:neural_break/game/neural_break_game.dart';
-import 'package:neural_break/game/util/game_constants.dart'; // Ensure game_constants is imported
+import 'package:neural_break/game/util/game_constants.dart';
 
-// The base class for all obstacles in the game.
-// All obstacles will move towards the player (downwards).
-class Obstacle extends PositionComponent with HasGameReference<NeuralBreakGame>, CollisionCallbacks { // ADDED CollisionCallbacks
-  // Define a paint for drawing the obstacle (can be overridden by specific types).
+class Obstacle extends PositionComponent
+    with
+        HasGameRef<NeuralBreakGame>, // ✅ Correct mixin for accessing gameRef
+        CollisionCallbacks {         // ✅ Replaces HasHitboxes
+
   final Paint _paint = Paint()
-    ..color = Colors.redAccent // A distinct color for obstacles
+    ..color = Colors.redAccent
     ..style = PaintingStyle.fill;
 
-  // The speed at which the obstacle moves towards the player.
-  // This will now be set by the spawner.
-  double obstacleSpeed; // Changed to be set via constructor
+  double obstacleSpeed;
+  int _updateCount = 0;
 
   Obstacle({
     Vector2? position,
     Vector2? size,
     Anchor? anchor,
-    required this.obstacleSpeed, // REQUIRED: Obstacle speed passed in constructor
+    required this.obstacleSpeed,
   }) : super(position: position, size: size, anchor: anchor);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    // ADDED: Add a RectangleHitbox for collision detection
     add(RectangleHitbox());
-    print('Obstacle: onLoad completed. Position: ${position.x.toStringAsFixed(2)}, ${position.y.toStringAsFixed(2)}'); // DIAGNOSTIC PRINT
+    print('Obstacle: onLoad completed. Position: ${position.x.toStringAsFixed(2)}, ${position.y.toStringAsFixed(2)}');
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    // Move the obstacle downwards (positive Y direction) towards the player.
     position.y += obstacleSpeed * dt;
 
-    // Remove the obstacle once it moves off-screen (past the bottom edge).
-    // If Anchor is center, position.y is the center, so add half the height
-    // to get the bottom edge, then check if it's below game height.
-    if (position.y - size.y / 2 > game.size.y) { // Correct: Use 'game'
-      // Only increase score if the game is still playing, to prevent score accumulation post-game over
-      if (game.gameState == GameState.playing) { // Assumes GameState is accessible via game
-        game.increaseScore(scorePerObstacle); // Assumes scorePerObstacle is defined in game_constants.dart
+    if (_updateCount < 5) {
+      print('Obstacle: ${this.hashCode} Update ${_updateCount++}, Y: ${position.y.toStringAsFixed(2)}, Speed: ${obstacleSpeed.toStringAsFixed(2)}');
+    }
+
+    if (position.y - size.y / 2 > gameRef.size.y) {
+      if (gameRef.gameState == GameState.playing) {
+        gameRef.increaseScore(scorePerObstacle);
       }
+      print('Obstacle: ${this.hashCode} Removed off-screen. Score increased to: ${gameRef.score}');
       removeFromParent();
-      print('Obstacle: Removed off-screen. Score increased to: ${game.score}'); // DIAGNOSTIC PRINT
     }
   }
 

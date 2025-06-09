@@ -4,79 +4,65 @@ import 'package:flame/components.dart';
 import 'package:neural_break/game/neural_break_game.dart';
 import 'package:neural_break/game/components/firewall.dart';
 import 'package:neural_break/game/util/game_constants.dart';
+import 'package:neural_break/game/components/obstacle.dart';
 
-// Manages the spawning of obstacles in the game.
-// This component will periodically add new obstacles to the game world.
-class ObstacleSpawner extends Component with HasGameReference<NeuralBreakGame> { // Correct: Use HasGameReference
-  // Timer to control when the next obstacle should spawn.
+class ObstacleSpawner extends Component with HasGameRef<NeuralBreakGame> { // ✅ Fixed mixin
   late TimerComponent _spawnTimer;
-  // Random number generator for selecting lanes and obstacle types.
   final Random _random = Random();
 
-  // New properties for dynamic difficulty
   double _currentObstacleSpeed = initialObstacleSpeed;
   double _currentSpawnInterval = initialSpawnInterval;
 
-  ObstacleSpawner() : super();
+  ObstacleSpawner();
 
   @override
   Future<void> onLoad() async {
-    await super.onLoad();
+    await super.onLoad(); // ✅ Ensures proper initialization
 
-    // Initialize the spawn timer.
     _initializeSpawnTimer();
-    add(_spawnTimer); // Add the timer component to the spawner.
+    add(_spawnTimer);
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    // TimerComponent handles its own update, so no direct update logic needed here
+    // TimerComponent updates itself
   }
 
-  // Helper method to initialize the spawn timer with current interval
   void _initializeSpawnTimer() {
     _spawnTimer = TimerComponent(
       period: _currentSpawnInterval,
-      autoStart: true,
       repeat: true,
       onTick: _spawnObstacle,
     );
   }
 
-  // This method is called by the timer to create and add a new obstacle.
   void _spawnObstacle() {
-    // Check if the game is playing before spawning obstacles
-    if (game.gameState != GameState.playing) { // Correct: Use 'game'
-      return;
-    }
+    if (gameRef.gameState != GameState.playing) return;
 
-    // Randomly select a lane for the new obstacle.
-    final laneIndex = _random.nextInt(GameLane.values.length);
+    final laneIndex = _random.nextInt(numLanes);
     final lane = GameLane.values[laneIndex];
+    final spawnX = getLaneX(lane, gameRef.size.x);
+    final spawnY = -playerSize / 2;
 
-    // For now, we'll only spawn Firewalls. Later, we can add more obstacle types.
-    final newObstacle = Firewall(
-      lane: lane,
-      gameWidth: game.size.x, // Correct: Use 'game'
+    final obstacle = Firewall( // ✅ Make sure Firewall constructor supports named params
+      position: Vector2(spawnX, spawnY),
+      size: Vector2(playerSize, playerSize),
+      anchor: Anchor.center,
       obstacleSpeed: _currentObstacleSpeed,
     );
 
-    // Add the newly created obstacle to the game.
-    game.add(newObstacle); // Correct: Use 'game'
+    gameRef.add(obstacle);
   }
 
-  // New method: Call this to stop obstacle spawning (e.g., on game over)
   void stopSpawning() {
     _spawnTimer.timer.stop();
   }
 
-  // New method: Call this to resume obstacle spawning (e.g., after game over or reset)
   void startSpawning() {
     _spawnTimer.timer.start();
   }
 
-  // New method: Adjusts difficulty based on the current level
   void increaseDifficulty(int level) {
     _currentObstacleSpeed = initialObstacleSpeed + (level - 1) * obstacleSpeedIncreasePerLevel;
     _currentSpawnInterval = initialSpawnInterval - (level - 1) * spawnIntervalDecreasePerLevel;
@@ -89,7 +75,6 @@ class ObstacleSpawner extends Component with HasGameReference<NeuralBreakGame> {
     add(_spawnTimer);
   }
 
-  // Resets spawner to initial state (e.g., for a new game)
   void reset() {
     _currentObstacleSpeed = initialObstacleSpeed;
     _currentSpawnInterval = initialSpawnInterval;

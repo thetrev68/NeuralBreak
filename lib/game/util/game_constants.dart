@@ -1,44 +1,54 @@
 // lib/game/util/game_constants.dart
-import 'package:flame/components.dart';
 
-// This file defines constants used throughout the game.
+import 'package:flame/components.dart'; // For Vector2
 
-// Player and game dimensions
-const double playerSize = 40.0;
-const double playerMoveSpeed = 300.0;
-const double playerJumpForce = 500.0;
-const double gravity = 980.0;
-const double jumpTapZoneWidth = 100.0; // Define a tap zone around the player for jumping
-const double slideTapZoneHeight = 100.0; // Define a tap zone below the player for sliding
+// Game configuration constants
+const double playerSize = 40.0; // Player size
+const double initialObstacleSpeed = 150.0; // Initial speed of obstacles
+const double initialSpawnInterval = 2.0; // Initial interval between obstacle spawns (seconds)
+const double obstacleSpeedIncreasePerLevel = 25.0; // How much obstacle speed increases each level
+const double spawnIntervalDecreasePerLevel = 0.2; // How much spawn interval decreases each level
+const double minSpawnInterval = 0.8; // Minimum possible spawn interval
+const int initialLives = 3; // Starting number of player lives
+const int scorePerObstacle = 10; // Score gained per obstacle dodged
+const int numLanes = 3; // Number of horizontal lanes in the game
+const double levelDuration = 18.0; // Approximate time (in seconds) for each level before difficulty increases
+const double gameOverDelay = 2.0; // Delay before game over screen appears
 
-// Slide properties
-const double slideDuration = 0.5; // How long the slide animation lasts in seconds
-const double playerSlideHeight = 20.0; // Player height when sliding
+// Player movement constants
+const double playerMoveSpeed = 300.0; // Speed at which player moves horizontally between lanes
+const double playerJumpForce = 400.0; // Initial upward velocity for jump
+const double gravity = 900.0; // Gravity affecting player's jump
 const double playerSlideWidth = 60.0; // Player width when sliding
+const double playerSlideHeight = 30.0; // Player height when sliding
+const double slideDuration = 0.5; // Duration of the slide action (seconds)
 
-// Game mechanics constants (NEW)
-const int initialLives = 3;
-const int scorePerObstacle = 10;
-const int levelUpScoreThreshold = 50; // Score required to advance to the next level
-const double initialObstacleSpeed = 200.0; // Starting speed for obstacles
-const double obstacleSpeedIncreasePerLevel = 50.0; // How much speed increases per level
-const double initialSpawnInterval = 2.0; // Initial time between obstacle spawns
-const double spawnIntervalDecreasePerLevel = 0.2; // How much spawn interval decreases per level
-const double minSpawnInterval = 0.5; // Minimum possible spawn interval
+// UI and Interaction Constants
+const double jumpTapZoneWidth = 100.0; // Width of the tap zone for jumping
+const double slideTapZoneHeight = 100.0; // Height of the tap zone for sliding (below player)
+const String gameOverMessage = "GAME OVER!\nTap to Restart";
+const String levelUpMessage = "LEVEL UP!\nTap to Continue";
 
-// Lane definitions
+// Enum for game lanes
 enum GameLane { left, center, right }
 
-// Function to calculate the center X position for a given lane
+// Helper function to get the X coordinate for the center of a given lane
 double getLaneX(GameLane lane, double gameWidth) {
-  final laneWidth = gameWidth / 3;
-
+  final double laneWidth = gameWidth / numLanes;
   switch (lane) {
     case GameLane.left:
       return laneWidth / 2;
     case GameLane.center:
-      return laneWidth + laneWidth / 2;
+      return gameWidth / 2;
     case GameLane.right:
-      return (laneWidth * 2) + laneWidth / 2;
+      return gameWidth - laneWidth / 2;
   }
+}
+
+// Helper function to get the Y coordinate for the ground level
+// This assumes the player's anchor is Anchor.center
+double getGroundY(double gameHeight, double playerHeight) {
+  // The player's anchor is center. To place its base at the ground,
+  // we need to offset by half its height from the ground.
+  return gameHeight - playerHeight / 2;
 }

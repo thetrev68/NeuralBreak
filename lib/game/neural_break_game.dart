@@ -1,32 +1,75 @@
-// lib/game/neural_break_game.dart
 import 'package:flame/game.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:flame/collisions.dart'; // Ensure HasCollisionDetection is imported
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flutter/services.dart';
+import 'dart:math';
 
 import 'package:neural_break/game/components/player.dart';
 import 'package:neural_break/game/components/obstacle.dart';
 import 'package:neural_break/game/components/obstacle_spawner.dart';
-import 'package:neural_break/game/util/game_constants.dart'; // Ensure all constants are available
+import 'package:neural_break/game/util/game_constants.dart';
 
-// Define game states
-enum GameState { playing, gameOver }
+// Game states
+enum GameState { playing, gameOver, levelUpPaused }
 
-class NeuralBreakGame extends FlameGame with TapCallbacks, HasCollisionDetection { // Ensure HasCollisionDetection is present
+class NeuralBreakGame extends FlameGame
+    with TapCallbacks, HasCollisionDetection, KeyboardEvents {
   late final Player player;
   late final ObstacleSpawner obstacleSpawner;
 
-  // Game state variables
   int score = 0;
   int lives = initialLives;
   int currentLevel = 1;
+  int _currentLevelScoreTarget = 0;
 
-  // UI Components for displaying game info
-  late TextComponent _scoreText;
-  late TextComponent _livesText;
-  late TextComponent _levelText;
-  late TextComponent _gameOverText;
+  // Text components
+  final TextComponent _scoreText = TextComponent(
+    text: 'Score: 0',
+    position: Vector2(10, 10),
+    textRenderer: TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
+  );
+
+  final TextComponent _livesText = TextComponent(
+    text: 'Lives: $initialLives',
+    position: Vector2(10, 40),
+    textRenderer: TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
+  );
+
+  final TextComponent _levelText = TextComponent(
+    text: 'Level: 1',
+    position: Vector2(10, 70),
+    textRenderer: TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
+  );
+
+  final TextComponent _gameOverText = TextComponent(
+    text: gameOverMessage,
+    anchor: Anchor.center,
+    position: Vector2.zero(),
+    priority: 10,
+    textRenderer: TextPaint(
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 32,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  );
+
+  final TextComponent _levelUpMessageText = TextComponent(
+    text: levelUpMessage,
+    anchor: Anchor.center,
+    position: Vector2.zero(),
+    priority: 10,
+    textRenderer: TextPaint(
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 32,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  );
 
   GameState gameState = GameState.playing;
 
@@ -37,68 +80,41 @@ class NeuralBreakGame extends FlameGame with TapCallbacks, HasCollisionDetection
   Future<void> onLoad() async {
     await super.onLoad();
 
+    add(_scoreText);
+    add(_livesText);
+    add(_levelText);
+
     player = Player();
     add(player);
 
     obstacleSpawner = ObstacleSpawner();
     add(obstacleSpawner);
 
-    // Initialize UI text components
-    _scoreText = TextComponent(
-      text: 'Score: $score',
-      position: Vector2(10, 10),
-      textRenderer: TextPaint(style: const TextStyle(fontSize: 20, color: Colors.white)),
-    );
-    add(_scoreText);
-
-    _livesText = TextComponent(
-      text: 'Lives: $lives',
-      position: Vector2(10, 40),
-      textRenderer: TextPaint(style: const TextStyle(fontSize: 20, color: Colors.white)),
-    );
-    add(_livesText);
-
-    _levelText = TextComponent(
-      text: 'Level: $currentLevel',
-      position: Vector2(10, 70),
-      textRenderer: TextPaint(style: const TextStyle(fontSize: 20, color: Colors.white)),
-    );
-    add(_levelText);
-
-    _gameOverText = TextComponent(
-      text: 'GAME OVER!\nTap to Restart',
-      anchor: Anchor.center,
-      position: size / 2,
-      priority: 10,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 32.0,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-
-    // Initially update UI to reflect starting values
+    _calculateCurrentLevelScoreTarget();
     _updateScoreText();
     _updateLivesText();
     _updateLevelText();
-    print('NeuralBreakGame: onLoad completed. Initialized components and UI.'); // DIAGNOSTIC PRINT
+  }
+
+  @override
+  void onGameResize(Vector2 canvasSize) {
+    super.onGameResize(canvasSize);
+    _gameOverText.position = canvasSize / 2;
+    _levelUpMessageText.position = canvasSize / 2;
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    if (gameState == GameState.playing) {
-      // Components' update methods are automatically called by Flame's engine
-    }
   }
 
   @override
   void onTapDown(TapDownEvent event) {
     if (gameState == GameState.gameOver) {
-      _restartGame(); // Tap to restart if game is over
-    } else {
+      _restartGame();
+    } else if (gameState == GameState.levelUpPaused) {
+      _continueGameAfterLevelUp();
+    } else if (gameState == GameState.playing) {
       final tapX = event.canvasPosition.x;
       final tapY = event.canvasPosition.y;
       final playerCenterX = player.position.x;
@@ -106,67 +122,73 @@ class NeuralBreakGame extends FlameGame with TapCallbacks, HasCollisionDetection
 
       final jumpZoneLeft = playerCenterX - (jumpTapZoneWidth / 2);
       final jumpZoneRight = playerCenterX + (jumpTapZoneWidth / 2);
-
       final slideZoneTop = playerCenterY + player.size.y / 2;
       final slideZoneBottom = slideZoneTop + slideTapZoneHeight;
 
-      if (tapX >= jumpZoneLeft && tapX <= jumpZoneRight && tapY < playerCenterY) {
+      if (tapX >= jumpZoneLeft &&
+          tapX <= jumpZoneRight &&
+          tapY < playerCenterY) {
         player.applyJump();
-        print('Game: Jump tap detected.'); // DIAGNOSTIC PRINT
-      } else if (tapX >= jumpZoneLeft && tapX <= jumpZoneRight && tapY > slideZoneTop && tapY < slideZoneBottom) {
+      } else if (tapX >= jumpZoneLeft &&
+          tapX <= jumpZoneRight &&
+          tapY > slideZoneTop &&
+          tapY < slideZoneBottom) {
         player.applySlide();
-        print('Game: Slide tap detected.'); // DIAGNOSTIC PRINT
       } else if (tapX < playerCenterX) {
         player.moveLeft();
-        print('Game: Move Left tap detected.'); // DIAGNOSTIC PRINT
       } else if (tapX > playerCenterX) {
         player.moveRight();
-        print('Game: Move Right tap detected.'); // DIAGNOSTIC PRINT
       }
     }
+  }
+
+  @override
+  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    if (event is KeyDownEvent &&
+        gameState == GameState.levelUpPaused &&
+        keysPressed.contains(LogicalKeyboardKey.keyQ)) {
+      return KeyEventResult.handled;
+    }
+    return super.onKeyEvent(event, keysPressed);
   }
 
   void loseLife() {
     if (gameState == GameState.playing) {
       lives--;
       _updateLivesText();
-      print('Game: Lost a life! Lives remaining: $lives'); // DIAGNOSTIC PRINT
 
       if (lives <= 0) {
-        gameOver(); // Real game over if no lives left
+        gameOver();
       } else {
-        _resetForNewLife(); // Reset game state for next life
+        _resetForNewLife();
       }
     }
   }
 
   void gameOver() {
-    if (gameState == GameState.playing) { // Ensure it's not already in game over state
+    if (gameState == GameState.playing) {
       gameState = GameState.gameOver;
-      add(_gameOverText); // Add game over text to the display
+      add(_gameOverText);
 
       player.stopAllActions();
       obstacleSpawner.stopSpawning();
-      children.whereType<Obstacle>().forEach((obstacle) => obstacle.removeFromParent());
-      print('Game: GAME OVER triggered! Lives: $lives'); // DIAGNOSTIC PRINT
+      children.whereType<Obstacle>().forEach((o) => o.removeFromParent());
     }
   }
 
   void _resetForNewLife() {
-    gameState = GameState.playing; // Resume playing
-    player.reset(); // Reset player position and state
-
-    children.whereType<Obstacle>().forEach((obstacle) => obstacle.removeFromParent());
+    gameState = GameState.playing;
+    player.reset();
     obstacleSpawner.reset();
-    print('Game: Reset for a new life. Current lives: $lives'); // DIAGNOSTIC PRINT
+    obstacleSpawner.startSpawning();
+    children.whereType<Obstacle>().forEach((o) => o.removeFromParent());
   }
 
   void increaseScore(int amount) {
     score += amount;
     _updateScoreText();
-    print('Game: Score increased to: $score'); // DIAGNOSTIC PRINT
 
-    if (score >= currentLevel * levelUpScoreThreshold) {
+    if (score >= _currentLevelScoreTarget) {
       _levelUp();
     }
   }
@@ -175,23 +197,24 @@ class NeuralBreakGame extends FlameGame with TapCallbacks, HasCollisionDetection
     currentLevel++;
     _updateLevelText();
     obstacleSpawner.increaseDifficulty(currentLevel);
-    print('Game: LEVEL UP! Current Level: $currentLevel'); // DIAGNOSTIC PRINT
+    _calculateCurrentLevelScoreTarget();
+
+    gameState = GameState.levelUpPaused;
+    add(_levelUpMessageText);
+
+    player.stopAllActions();
+    obstacleSpawner.stopSpawning();
+    children.whereType<Obstacle>().forEach((o) => o.removeFromParent());
   }
 
-  // Helper methods to update UI text
-  void _updateScoreText() {
-    _scoreText.text = 'Score: $score';
+  void _continueGameAfterLevelUp() {
+    _levelUpMessageText.removeFromParent();
+    gameState = GameState.playing;
+
+    player.reset();
+    obstacleSpawner.startSpawning();
   }
 
-  void _updateLivesText() {
-    _livesText.text = 'Lives: $lives';
-  }
-
-  void _updateLevelText() {
-    _levelText.text = 'Level: $currentLevel';
-  }
-
-  // Method to restart the entire game from scratch
   void _restartGame() {
     score = 0;
     lives = initialLives;
@@ -202,12 +225,33 @@ class NeuralBreakGame extends FlameGame with TapCallbacks, HasCollisionDetection
     _updateLevelText();
 
     _gameOverText.removeFromParent();
-
     player.reset();
     obstacleSpawner.reset();
-    children.whereType<Obstacle>().forEach((obstacle) => obstacle.removeFromParent());
+    obstacleSpawner.startSpawning();
+    children.whereType<Obstacle>().forEach((o) => o.removeFromParent());
 
     gameState = GameState.playing;
-    print('Game: Game fully restarted!'); // DIAGNOSTIC PRINT
+    _calculateCurrentLevelScoreTarget();
+  }
+
+  void _calculateCurrentLevelScoreTarget() {
+    double spawnInterval = initialSpawnInterval - (currentLevel - 1) * spawnIntervalDecreasePerLevel;
+    if (spawnInterval < minSpawnInterval) {
+      spawnInterval = minSpawnInterval;
+    }
+    int estimatedObstacles = (levelDuration / spawnInterval).ceil();
+    _currentLevelScoreTarget = score + (estimatedObstacles * scorePerObstacle);
+  }
+
+  void _updateScoreText() {
+    _scoreText.text = 'Score: $score';
+  }
+
+  void _updateLivesText() {
+    _livesText.text = 'Lives: $lives';
+  }
+
+  void _updateLevelText() {
+    _levelText.text = 'Level: $currentLevel';
   }
 }
