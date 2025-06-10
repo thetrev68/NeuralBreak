@@ -5,6 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
 
+
+import 'package:neural_break/game/managers/score_manager.dart';
+import 'package:neural_break/game/managers/life_manager.dart';
+import 'package:neural_break/game/managers/game_state_manager.dart';
+import 'package:neural_break/game/managers/ui_manager.dart';
+import 'package:neural_break/game/managers/game_controller.dart';
+import 'package:neural_break/game/managers/component_manager.dart';
+import 'package:neural_break/game/managers/input_manager.dart';
+import 'package:neural_break/game/managers/scene_manager.dart';
+
 // Game components
 import 'package:neural_break/game/components/player.dart';
 import 'package:neural_break/game/components/obstacle.dart';
@@ -24,13 +34,7 @@ class NeuralBreakGame extends FlameGame
   late final ObstaclePool obstaclePool;
   late final ObstacleSpawner obstacleSpawner;
   
-  // Game progression variables
-  int score = 0;
-  int lives = initialLives;
-  int currentLevel = 1;
-  int _currentLevelScoreTarget = 0;
-
-  // UI: Text elements for on-screen stats
+    // UI: Text elements for on-screen stats
   final TextComponent _scoreText = TextComponent(
     text: 'Score: 0',
     position: Vector2(10, 10),
@@ -80,26 +84,49 @@ class NeuralBreakGame extends FlameGame
 
   /// Initializes all components when the game starts
   @override
-  Future<void> onLoad() async {
-    await super.onLoad();
+  @override
+Future<void> onLoad() async {
+  await super.onLoad();
 
-    obstaclePool = ObstaclePool(); // Add this line
+  // Core game actors
+  player = Player();
+  obstaclePool = ObstaclePool();
+  obstacleSpawner = ObstacleSpawner();
 
-    add(_scoreText);
-    add(_livesText);
-    add(_levelText);
+  // Initialize managers
+  scoreManager = ScoreManager(levelUpThreshold: 100);
+  lifeManager = LifeManager(initialLives: initialLives);
+  gameStateManager = GameStateManager();
+  uiManager = UIManager(
+    scoreManager: scoreManager,
+    lifeManager: lifeManager,
+    position: Vector2(10, 10),
+  );
+  gameController = GameController(
+    scoreManager: scoreManager,
+    lifeManager: lifeManager,
+    gameStateManager: gameStateManager,
+    uiManager: uiManager,
+  );
+  componentManager = ComponentManager(
+    player: player,
+    spawner: obstacleSpawner,
+    pool: obstaclePool,
+    game: this,
+  );
+  inputManager = InputManager(
+    onTapAction: () => print('Tap!'), // Replace with actual action
+    onRestart: _restartGame,
+  );
+  sceneManager = SceneManager();
 
-    player = Player();
-    add(player);
+  // Add all components
+  addAll(uiManager.textComponents);
+  componentManager.initializeComponents();
 
-    obstacleSpawner = ObstacleSpawner();
-    add(obstacleSpawner);
-
-    _calculateCurrentLevelScoreTarget();
-    _updateScoreText();
-    _updateLivesText();
-    _updateLevelText();
-  }
+  // Game logic setup
+  _calculateCurrentLevelScoreTarget();
+}
 
   /// Repositions messages when the game window resizes
   @override
@@ -110,10 +137,15 @@ class NeuralBreakGame extends FlameGame
   }
 
   @override
-  void update(double dt) {
-    super.update(dt);
-    // Game update loop runs here — handled by components
+  @override
+void update(double dt) {
+  super.update(dt);
+
+  // Future expansion: handle per-frame logic based on game state or scene
+  if (sceneManager.is(Scene.gameplay) && gameStateManager.isPlaying()) {
+    // gameController.tick(dt); // Placeholder for future game logic
   }
+}
 
   /// Handles all tap input depending on game state and tap location
   @override
@@ -231,33 +263,23 @@ class NeuralBreakGame extends FlameGame
   }
 
   void _restartGame() {
-    score = 0;
-    lives = initialLives;
-    currentLevel = 1;
-
-    _updateScoreText();
-    _updateLivesText();
-    _updateLevelText();
-
-    _gameOverText.removeFromParent();
-    player.reset();
-    obstacleSpawner.reset();
-    obstaclePool.clear(); // Add here
-    obstacleSpawner.startSpawning();
-    children.whereType<Obstacle>().forEach((o) => o.removeFromParent());
-
-    gameState = GameState.playing;
+    gameController.restartGame();
+    uiManager.updateTexts();
+    componentManager.resetComponents();
     _calculateCurrentLevelScoreTarget();
   }
 
   void _calculateCurrentLevelScoreTarget() {
+    int currentLevel = scoreManager.level;
+    int currentScore = scoreManager.score;
+
     double spawnInterval = initialSpawnInterval - (currentLevel - 1) * spawnIntervalDecreasePerLevel;
     if (spawnInterval < minSpawnInterval) {
       spawnInterval = minSpawnInterval;
     }
 
     int estimatedObstacles = (levelDuration / spawnInterval).ceil();
-    _currentLevelScoreTarget = score + (estimatedObstacles * scorePerObstacle);
+    _currentLevelScoreTarget = currentScore + (estimatedObstacles * scorePerObstacle);
   }
 
   void _updateScoreText() {
