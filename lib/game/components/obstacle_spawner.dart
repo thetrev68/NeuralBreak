@@ -12,7 +12,7 @@ import 'package:neural_break/game/managers/obstacle_pool.dart';
 
 /// Spawns obstacles into the game world at regular intervals.
 /// Adjusts speed and timing dynamically to scale game difficulty.
-class ObstacleSpawner extends Component with HasGameRef<NeuralBreakGame> {
+class ObstacleSpawner extends Component with HasGameReference<NeuralBreakGame> {
   // Timer that triggers obstacle creation
   late TimerComponent _spawnTimer;
 
@@ -33,7 +33,7 @@ class ObstacleSpawner extends Component with HasGameRef<NeuralBreakGame> {
     add(_spawnTimer);        // Register timer as child component
   }
 
-  /// Creates the timer logic for periodically spawning obstacles
+  // Creates the timer logic for periodically spawning obstacles
   void _initializeSpawnTimer() {
     _spawnTimer = TimerComponent(
       period: _currentSpawnInterval, // Time between spawns
@@ -42,38 +42,38 @@ class ObstacleSpawner extends Component with HasGameRef<NeuralBreakGame> {
     );
   }
 
-  /// Spawns a new obstacle at a random horizontal lane
+  // Spawns a new obstacle at a random horizontal lane
   void _spawnObstacle() {
     // Only spawn if game is actively running
-    if (gameRef.gameState != GameState.playing) return;
+    if (game.gameState != GameState.playing) return;
 
     // Choose a random lane and calculate spawn position
     final laneIndex = _random.nextInt(numLanes);
     final lane = GameLane.values[laneIndex];
-    final spawnX = getLaneX(lane, gameRef.size.x);
+    final spawnX = getLaneX(lane, game.size.x);
     final spawnY = -playerSize / 2; // Slightly above the visible screen
 
     // Create and position a new Firewall obstacle
-    final obstacle = gameRef.obstaclePool.getObstacle(
+    final obstacle = game.obstaclePool.getObstacle(
       position: Vector2(spawnX, spawnY),
       size: Vector2(playerSize, playerSize),
       speed: _currentObstacleSpeed,
     );
 
-    gameRef.add(obstacle); // Add to the game world
+    game.add(obstacle); // Add to the game world
   }
 
-  /// Temporarily pauses obstacle spawning
+  // Temporarily pauses obstacle spawning
   void stopSpawning() {
     _spawnTimer.timer.stop();
   }
 
-  /// Resumes obstacle spawning
+  // Resumes obstacle spawning
   void startSpawning() {
     _spawnTimer.timer.start();
   }
 
-  /// Increase difficulty: faster spawn rate, faster obstacles
+  // Increase difficulty: faster spawn rate, faster obstacles
   void increaseDifficulty(int level) {
     // Speed up obstacle movement
     _currentObstacleSpeed = initialObstacleSpeed +
@@ -94,7 +94,7 @@ class ObstacleSpawner extends Component with HasGameRef<NeuralBreakGame> {
     add(_spawnTimer);
   }
 
-  /// Resets speed and interval to initial values
+  // Resets speed and interval to initial values
   void reset() {
     _currentObstacleSpeed = initialObstacleSpeed;
     _currentSpawnInterval = initialSpawnInterval;

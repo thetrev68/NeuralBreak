@@ -7,8 +7,8 @@ import 'package:neural_break/game/util/game_constants.dart';
 // Imports jump logic to ensure sliding doesn't conflict with jumping
 import 'package:neural_break/game/components/player_jump.dart';
 
-/// Mixin for adding slide behavior to a Flame PositionComponent.
-/// This allows any component to have slide logic by simply mixing this in.
+// Mixin for adding slide behavior to a Flame PositionComponent.
+// This allows any component to have slide logic by simply mixing this in.
 mixin PlayerSlide on PositionComponent {
   // Internal state: is the player currently sliding?
   bool _isSliding = false;
@@ -22,14 +22,14 @@ mixin PlayerSlide on PositionComponent {
   // Public getter to check slide status
   bool get isSliding => _isSliding;
 
-  /// Called during component initialization (e.g., in onLoad)
-  /// Stores the initial size so we can revert after sliding ends
+  // Called during component initialization (e.g., in onLoad)
+  // Stores the initial size so we can revert after sliding ends
   void initializeSlide() {
     _originalPlayerSize = Vector2.copy(size);
   }
 
-  /// Begins the slide action
-  /// Player must be on the ground and not jumping to start a slide
+  // Begins the slide action
+  // Player must be on the ground and not jumping to start a slide
   void slide() {
     final isJumping = this is PlayerJump && (this as PlayerJump).isJumping;
     final groundY = this is PlayerJump ? (this as PlayerJump).groundY : position.y;
@@ -42,8 +42,8 @@ mixin PlayerSlide on PositionComponent {
     }
   }
 
-  /// Updates the slide each frame
-  /// Ends the slide automatically when time runs out
+  // Updates the slide each frame
+  // Ends the slide automatically when time runs out
   void updateSlide(double dt) {
     if (_isSliding) {
       _slideTimer -= dt; // Decrease the timer
@@ -56,10 +56,10 @@ mixin PlayerSlide on PositionComponent {
     }
   }
 
-  /// Reset slide state (used during full game reset)
+  // Reset slide state (used during full game reset)
   void resetSlide() => stopSlide();
 
-  /// Stop the slide immediately (e.g., when stopping all player actions)
+  // Stop the slide immediately (e.g., when stopping all player actions)
   void stopSlide() {
     if (_isSliding) {
       size.setFrom(_originalPlayerSize); // Revert to original size

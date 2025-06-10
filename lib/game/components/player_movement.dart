@@ -8,8 +8,8 @@ import 'package:neural_break/game/util/game_constants.dart';
 import 'package:neural_break/game/neural_break_game.dart';
 
 // Adds horizontal lane-based movement to the component.
-// Requires the component to mix in HasGameRef<NeuralBreakGame>.
-mixin PlayerMovement on PositionComponent {
+// Requires the component to mix in HasGameReference<NeuralBreakGame>.
+mixin PlayerMovement on PositionComponent, HasGameReference<NeuralBreakGame> { // <--- NEW
   // Internal X target for movement interpolation
   double _internalTargetX = 0.0;
 
@@ -21,8 +21,9 @@ mixin PlayerMovement on PositionComponent {
 
   // Initializes the movement by placing the player in the center lane
   void initializeMovement() {
-    final game = (this as HasGameRef<NeuralBreakGame>).gameRef;
-    _internalTargetX = getLaneX(_currentLane, game.size.x); // Get lane X from game width
+    // OLD: final game = (this as HasGameReference<NeuralBreakGame>).game;
+    // NEW:
+    _internalTargetX = getLaneX(_currentLane, game.size.x); // Use 'game' directly
     position.x = _internalTargetX; // Set initial horizontal position
   }
 
@@ -68,8 +69,8 @@ mixin PlayerMovement on PositionComponent {
 
   // Recalculates target X based on the current lane
   void _updateTargetX() {
-    final game = (this as HasGameRef<NeuralBreakGame>).gameRef;
-    _internalTargetX = getLaneX(_currentLane, game.size.x); // Use helper function
+    // OLD: final mygame = game;
+    _internalTargetX = getLaneX(_currentLane, game.size.x); // Use 'game' directly
   }
 
   // Reset lane to center and reinitialize X position

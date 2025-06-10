@@ -7,8 +7,8 @@ import 'package:neural_break/game/util/game_constants.dart';
 // Used to check whether the player is currently sliding
 import 'package:neural_break/game/components/player_slide.dart';
 
-/// Mixin to add jump capability to a PositionComponent.
-/// Requires the base class to include `HasGameRef<NeuralBreakGame>`.
+// Mixin to add jump capability to a PositionComponent.
+// Requires the base class to include `HasGameReference<NeuralBreakGame>`.
 mixin PlayerJump on PositionComponent {
   // Vertical velocity used in jumping physics
   double _velocityY = 0.0;
@@ -25,14 +25,14 @@ mixin PlayerJump on PositionComponent {
   // Getter to expose the ground Y-value
   double get groundY => _groundY;
 
-  /// Called during component initialization (e.g., onLoad)
-  /// Records the starting Y position as the "ground" level
+  // Called during component initialization (e.g., onLoad)
+  // Records the starting Y position as the "ground" level
   void initializeJump() {
     _groundY = position.y;
   }
 
-  /// Attempts to trigger a jump
-  /// Will not jump if already in the air or if currently sliding
+  // Attempts to trigger a jump
+  // Will not jump if already in the air or if currently sliding
   void jump() {
     if (_isJumping) return;
 
@@ -44,7 +44,7 @@ mixin PlayerJump on PositionComponent {
     }
   }
 
-  /// Called every frame to apply gravity and update vertical position
+  // Called every frame to apply gravity and update vertical position
   void updateJump(double dt) {
     if (!_isJumping) return;
 
@@ -59,14 +59,14 @@ mixin PlayerJump on PositionComponent {
     }
   }
 
-  /// Resets jump-related state and places the component back on the ground
+  // Resets jump-related state and places the component back on the ground
   void resetJump() {
     _isJumping = false;
     _velocityY = 0.0;
     position.y = _groundY;
   }
 
-  /// Stops the jump in progress (used to cancel actions)
+  // Stops the jump in progress (used to cancel actions)
   void stopJump() {
     _isJumping = false;
     _velocityY = 0.0;

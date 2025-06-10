@@ -9,5 +9,5 @@ class SceneManager {
     _current = scene;
   }
 
-  bool is(Scene scene) => _current == scene;
+  bool isScene(Scene scene) => _current == scene;
 }

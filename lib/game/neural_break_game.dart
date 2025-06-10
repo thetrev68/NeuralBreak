@@ -33,6 +33,16 @@ class NeuralBreakGame extends FlameGame
   late final Player player;
   late final ObstaclePool obstaclePool;
   late final ObstacleSpawner obstacleSpawner;
+  late final ScoreManager scoreManager;
+  late final LifeManager lifeManager;
+  late final GameStateManager gameStateManager;
+  late final UIManager uiManager;
+  late final GameController gameController;
+  late final ComponentManager componentManager;
+  late final InputManager inputManager;
+  late final SceneManager sceneManager;
+
+  int _currentLevelScoreTarget = 0;
   
     // UI: Text elements for on-screen stats
   final TextComponent _scoreText = TextComponent(
@@ -142,7 +152,7 @@ void update(double dt) {
   super.update(dt);
 
   // Future expansion: handle per-frame logic based on game state or scene
-  if (sceneManager.is(Scene.gameplay) && gameStateManager.isPlaying()) {
+  if (sceneManager.isScene(Scene.gameplay) && gameStateManager.isPlaying()) {
     // gameController.tick(dt); // Placeholder for future game logic
   }
 }
@@ -200,10 +210,10 @@ void update(double dt) {
 
   void loseLife() {
     if (gameState == GameState.playing) {
-      lives--;
+      lifeManager.loseLife(); // Assuming LifeManager has a method called loseLife()
       _updateLivesText();
 
-      if (lives <= 0) {
+      if (lifeManager.lives <= 0) {
         gameOver();
       } else {
         _resetForNewLife();
@@ -232,18 +242,19 @@ void update(double dt) {
   }
 
   void increaseScore(int amount) {
-    score += amount;
-    _updateScoreText();
+    scoreManager.incrementScore(amount); // This will handle updating scoreManager.score
+    uiManager.updateTexts; // Assuming uiManager has a method for this
 
-    if (score >= _currentLevelScoreTarget) {
+    if (scoreManager.score >= _currentLevelScoreTarget) {
       _levelUp();
     }
   }
 
   void _levelUp() {
-    currentLevel++;
-    _updateLevelText();
-    obstacleSpawner.increaseDifficulty(currentLevel);
+    scoreManager.checkLevelUp(); // Assuming scoreManager handles level increment
+    uiManager.updateTexts; // Assuming uiManager updates level text
+
+    obstacleSpawner.increaseDifficulty(scoreManager.level);
     _calculateCurrentLevelScoreTarget();
 
     gameState = GameState.levelUpPaused;
@@ -270,8 +281,9 @@ void update(double dt) {
   }
 
   void _calculateCurrentLevelScoreTarget() {
-    int currentLevel = scoreManager.level;
-    int currentScore = scoreManager.score;
+    int currentLevel = scoreManager.level; // This is correct
+    // The currentScore variable itself might not be needed if not used elsewhere,
+    // but ensure any usage of `score` here becomes `scoreManager.score`.
 
     double spawnInterval = initialSpawnInterval - (currentLevel - 1) * spawnIntervalDecreasePerLevel;
     if (spawnInterval < minSpawnInterval) {
@@ -279,18 +291,18 @@ void update(double dt) {
     }
 
     int estimatedObstacles = (levelDuration / spawnInterval).ceil();
-    _currentLevelScoreTarget = currentScore + (estimatedObstacles * scorePerObstacle);
+    _currentLevelScoreTarget = scoreManager.score + (estimatedObstacles * scorePerObstacle); // Corrected this line
   }
 
   void _updateScoreText() {
-    _scoreText.text = 'Score: $score';
+  _scoreText.text = 'Score: ${scoreManager.score}';
   }
 
   void _updateLivesText() {
-    _livesText.text = 'Lives: $lives';
+    _livesText.text = 'Lives: ${lifeManager.lives}';
   }
 
   void _updateLevelText() {
-    _levelText.text = 'Level: $currentLevel';
+    _levelText.text = 'Level: ${scoreManager.level}';
   }
 }

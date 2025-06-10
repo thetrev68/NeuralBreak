@@ -14,7 +14,7 @@ import 'package:neural_break/game/components/obstacle.dart';        // Obstacle 
 // Main Player class
 class Player extends PositionComponent
     with
-        HasGameRef<NeuralBreakGame>, // Provides access to gameRef, the main game instance
+        HasGameReference<NeuralBreakGame>, // Provides access to gameRef, the main game instance
         CollisionCallbacks,          // Enables collision detection
         PlayerMovement,              // Adds movement behavior
         PlayerJump,                  // Adds jump behavior
@@ -38,7 +38,7 @@ class Player extends PositionComponent
     await super.onLoad();
 
     initializeMovement(); // Initialize movement variables and states
-    position.y = gameRef.size.y - size.y * 2; // Start player near the bottom of the screen
+    position.y = game.size.y - size.y * 2; // Start player near the bottom of the screen
 
     initializeJump();   // Setup for jumping logic
     initializeSlide();  // Setup for sliding logic
@@ -67,7 +67,7 @@ class Player extends PositionComponent
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other); // Ensure parent class behavior runs
     if (other is Obstacle) {
-      gameRef.loseLife(); // Player loses a life when hitting an obstacle
+      game.loseLife(); // Player loses a life when hitting an obstacle
     }
   }
 
@@ -76,7 +76,7 @@ class Player extends PositionComponent
     resetMovement();  // Reset movement-related properties
     resetJump();      // Reset jumping state
     resetSlide();     // Reset sliding state
-    position.y = gameRef.size.y - size.y * 2; // Reposition at starting Y
+    position.y = game.size.y - size.y * 2; // Reposition at starting Y
   }
 
   // Stops all ongoing player actions (e.g., for pausing or death)

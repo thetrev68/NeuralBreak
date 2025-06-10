@@ -16,7 +16,7 @@ import 'package:neural_break/game/util/game_constants.dart';   // Constants like
 // and uses hitboxes for collision with the player.
 class Obstacle extends PositionComponent
     with
-        HasGameRef<NeuralBreakGame>, // Gives access to gameRef
+        HasGameReference<NeuralBreakGame>, // Gives access to gameRef
         CollisionCallbacks {         // Enables collision handling
 
   // Red paint used to draw the obstacle
@@ -68,15 +68,15 @@ class Obstacle extends PositionComponent
     }
 
     // If the obstacle goes off the bottom of the screen
-    if (position.y - size.y / 2 > gameRef.size.y) {
-      if (gameRef.gameState == GameState.playing) {
+    if (position.y - size.y / 2 > game.size.y) {
+      if (game.gameState == GameState.playing) {
         // Increase score if game is still in play
-        gameRef.increaseScore(scorePerObstacle);
+        game.increaseScore(scorePerObstacle);
       }
 
       print(
         'Obstacle: $hashCode Removed off-screen. '
-        'Score increased to: ${gameRef.score}',
+        'Score increased to: ${game.scoreManager.score}',
       );
 
       removeFromParent(); // Remove this obstacle from the game
@@ -95,8 +95,8 @@ class Obstacle extends PositionComponent
     super.onRemove();
 
     // Return to pool if we're in the main game context
-    if (gameRef is NeuralBreakGame) {
-      (gameRef as NeuralBreakGame).obstaclePool.returnObstacle(this);
+    if (game is NeuralBreakGame) {
+      (game as NeuralBreakGame).obstaclePool.returnObstacle(this);
     }
   }
 }

@@ -14,7 +14,7 @@ class InputManager {
     onTapAction();
   }
 
-  void handleKeyboard(RawKeyEvent event) {
+  void handleKeyboard(KeyEvent event) {
     if (event.logicalKey == LogicalKeyboardKey.space) {
       onRestart();
     }
