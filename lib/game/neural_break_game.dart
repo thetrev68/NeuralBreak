@@ -1,30 +1,36 @@
+// Core Flame & Flutter dependencies
 import 'package:flame/game.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
-import 'dart:math';
 
+// Game components
 import 'package:neural_break/game/components/player.dart';
 import 'package:neural_break/game/components/obstacle.dart';
 import 'package:neural_break/game/components/obstacle_spawner.dart';
 import 'package:neural_break/game/util/game_constants.dart';
+import 'package:neural_break/game/managers/obstacle_pool.dart';
 
-// Game states
+/// Defines possible game states
 enum GameState { playing, gameOver, levelUpPaused }
 
+/// The main game class. Manages all gameplay logic and components.
 class NeuralBreakGame extends FlameGame
     with TapCallbacks, HasCollisionDetection, KeyboardEvents {
+  
+  // Main game actors
   late final Player player;
+  late final ObstaclePool obstaclePool;
   late final ObstacleSpawner obstacleSpawner;
-
+  
+  // Game progression variables
   int score = 0;
   int lives = initialLives;
   int currentLevel = 1;
   int _currentLevelScoreTarget = 0;
 
-  // Text components
+  // UI: Text elements for on-screen stats
   final TextComponent _scoreText = TextComponent(
     text: 'Score: 0',
     position: Vector2(10, 10),
@@ -43,42 +49,41 @@ class NeuralBreakGame extends FlameGame
     textRenderer: TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
   );
 
+  // UI: Game over message
   final TextComponent _gameOverText = TextComponent(
     text: gameOverMessage,
     anchor: Anchor.center,
     position: Vector2.zero(),
     priority: 10,
     textRenderer: TextPaint(
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-      ),
+      style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
     ),
   );
 
+  // UI: Level-up message
   final TextComponent _levelUpMessageText = TextComponent(
     text: levelUpMessage,
     anchor: Anchor.center,
     position: Vector2.zero(),
     priority: 10,
     textRenderer: TextPaint(
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-      ),
+      style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
     ),
   );
 
+  // Current game state
   GameState gameState = GameState.playing;
 
+  // Set game background
   @override
   Color backgroundColor() => Colors.black;
 
+  /// Initializes all components when the game starts
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+
+    obstaclePool = ObstaclePool(); // Add this line
 
     add(_scoreText);
     add(_livesText);
@@ -96,25 +101,29 @@ class NeuralBreakGame extends FlameGame
     _updateLevelText();
   }
 
+  /// Repositions messages when the game window resizes
   @override
-  void onGameResize(Vector2 canvasSize) {
-    super.onGameResize(canvasSize);
-    _gameOverText.position = canvasSize / 2;
-    _levelUpMessageText.position = canvasSize / 2;
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    _gameOverText.position = size / 2;
+    _levelUpMessageText.position = size / 2;
   }
 
   @override
   void update(double dt) {
     super.update(dt);
+    // Game update loop runs here — handled by components
   }
 
+  /// Handles all tap input depending on game state and tap location
   @override
   void onTapDown(TapDownEvent event) {
     if (gameState == GameState.gameOver) {
-      _restartGame();
+      _restartGame(); // Restart on game over tap
     } else if (gameState == GameState.levelUpPaused) {
-      _continueGameAfterLevelUp();
+      _continueGameAfterLevelUp(); // Resume after level-up
     } else if (gameState == GameState.playing) {
+      // Handle in-game tap logic
       final tapX = event.canvasPosition.x;
       final tapY = event.canvasPosition.y;
       final playerCenterX = player.position.x;
@@ -125,23 +134,26 @@ class NeuralBreakGame extends FlameGame
       final slideZoneTop = playerCenterY + player.size.y / 2;
       final slideZoneBottom = slideZoneTop + slideTapZoneHeight;
 
-      if (tapX >= jumpZoneLeft &&
-          tapX <= jumpZoneRight &&
-          tapY < playerCenterY) {
+      // Tap above player = jump
+      if (tapX >= jumpZoneLeft && tapX <= jumpZoneRight && tapY < playerCenterY) {
         player.applyJump();
-      } else if (tapX >= jumpZoneLeft &&
-          tapX <= jumpZoneRight &&
-          tapY > slideZoneTop &&
-          tapY < slideZoneBottom) {
+      }
+      // Tap below player = slide
+      else if (tapX >= jumpZoneLeft && tapX <= jumpZoneRight && tapY > slideZoneTop && tapY < slideZoneBottom) {
         player.applySlide();
-      } else if (tapX < playerCenterX) {
+      }
+      // Tap left = move left
+      else if (tapX < playerCenterX) {
         player.moveLeft();
-      } else if (tapX > playerCenterX) {
+      }
+      // Tap right = move right
+      else if (tapX > playerCenterX) {
         player.moveRight();
       }
     }
   }
 
+  /// Optional keyboard event for level-up pause
   @override
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (event is KeyDownEvent &&
@@ -151,6 +163,8 @@ class NeuralBreakGame extends FlameGame
     }
     return super.onKeyEvent(event, keysPressed);
   }
+
+  // ───── Game Logic Helpers ─────
 
   void loseLife() {
     if (gameState == GameState.playing) {
@@ -180,6 +194,7 @@ class NeuralBreakGame extends FlameGame
     gameState = GameState.playing;
     player.reset();
     obstacleSpawner.reset();
+    obstaclePool.clear(); // Add here
     obstacleSpawner.startSpawning();
     children.whereType<Obstacle>().forEach((o) => o.removeFromParent());
   }
@@ -227,6 +242,7 @@ class NeuralBreakGame extends FlameGame
     _gameOverText.removeFromParent();
     player.reset();
     obstacleSpawner.reset();
+    obstaclePool.clear(); // Add here
     obstacleSpawner.startSpawning();
     children.whereType<Obstacle>().forEach((o) => o.removeFromParent());
 
@@ -239,6 +255,7 @@ class NeuralBreakGame extends FlameGame
     if (spawnInterval < minSpawnInterval) {
       spawnInterval = minSpawnInterval;
     }
+
     int estimatedObstacles = (levelDuration / spawnInterval).ceil();
     _currentLevelScoreTarget = score + (estimatedObstacles * scorePerObstacle);
   }

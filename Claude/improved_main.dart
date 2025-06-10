@@ -1,79 +1,59 @@
-// Flutter UI framework
 import 'package:flutter/material.dart';
-
-// Flame's widget to embed the game
 import 'package:flame/game.dart';
-
-// Controls device orientation
 import 'package:flutter/services.dart';
 
-// Your custom game implementation
 import 'package:neural_break/game/neural_break_game.dart';
 
 void main() {
-  // Ensures Flutter's widget system is fully initialized before starting
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Lock the app to portrait orientation only
+  
+  // Lock to portrait mode for consistency
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
-  // Start the app by running the custom Flutter widget tree
+  
   runApp(const NeuralBreakApp());
 }
 
-/// The root widget of the app, hosting the theme and home screen
 class NeuralBreakApp extends StatelessWidget {
-  const NeuralBreakApp({super.key});
+  const NeuralBreakApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Neural Break',
-
-      // Uses a dark theme with a blue accent
       theme: ThemeData.dark().copyWith(
-        colorScheme: ColorScheme.dark(
-          primary: Colors.blue,
-        ),
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.black,
       ),
-
-      // Sets the first screen of the app
       home: const GameScreen(),
-
-      // Removes the "debug" banner
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-/// Hosts the actual game screen using Flame's GameWidget
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  const GameScreen({Key? key}) : super(key: key);
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
-  // Instance of your Flame game
   late final NeuralBreakGame game;
 
   @override
   void initState() {
     super.initState();
-    game = NeuralBreakGame(); // Create the game once during widget initialization
+    game = NeuralBreakGame();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Embeds the Flame game inside the widget tree
       body: GameWidget<NeuralBreakGame>.controlled(
-        gameFactory: () => game, // Provides the game instance
-        // You can later add overlayBuilderMap: {} here for menus and HUD
+        gameFactory: () => game,
       ),
     );
   }
