@@ -6,7 +6,7 @@ import 'package:flame/components.dart';
 
 // Import your obstacle and firewall definitions
 import 'package:neural_break/game/components/obstacle.dart';
-import 'package:neural_break/game/components/firewall.dart';
+import 'package:neural_break/game/components/firewall.dart'; // Assuming Firewall is the type you primarily pool
 import 'package:neural_break/game/util/game_constants.dart';
 
 /// Object pool for obstacles to reduce garbage collection overhead
@@ -14,19 +14,19 @@ class ObstaclePool {
   // Queue of inactive obstacles waiting to be reused
   final Queue<Obstacle> _availableObstacles = Queue<Obstacle>();
 
-  // Set of obstacles currently in use
+  // Set of obstacles currently in use (actively in the game world)
   final Set<Obstacle> _activeObstacles = <Obstacle>{};
 
-  // Initial and maximum size of the pool
+  // Initial and maximum size of the pool to control memory usage
   static const int _initialPoolSize = 10;
   static const int _maxPoolSize = 20;
 
-  // Constructor pre-fills the pool
+  // Constructor: Initializes the pool with a set number of obstacles.
   ObstaclePool() {
     _initializePool();
   }
 
-  // Fill the pool with pre-created obstacles
+  // Fill the pool with pre-created obstacles to avoid runtime instantiation overhead.
   void _initializePool() {
     for (int i = 0; i < _initialPoolSize; i++) {
       final obstacle = _createNewObstacle();
@@ -34,63 +34,67 @@ class ObstaclePool {
     }
   }
 
-  // How to create a default obstacle (used in initialization and fallback)
+  // Creates a new default obstacle instance.
+  // This is used for initial pool filling and when the pool needs to expand.
+  // Note: position, size, and speed will be set by the spawner later.
   Obstacle _createNewObstacle() {
+    // Changed 'obstacleSpeed' to 'speed' to match Obstacle's constructor
     return Firewall(
-      position: Vector2.zero(),                     // Will be reset later
-      size: Vector2(playerSize, playerSize),
+      position: Vector2.zero(), // Initial position (will be overridden)
+      size: Vector2(playerSize, playerSize), // Default size
       anchor: Anchor.center,
-      obstacleSpeed: initialObstacleSpeed,
+      speed: initialObstacleSpeed, // Changed from obstacleSpeed to speed
     );
   }
 
-  /// Get an obstacle from the pool or create a new one
-  Obstacle getObstacle({
-    required Vector2 position,
-    required Vector2 size,
-    required double speed,
-  }) {
-    Obstacle obstacle;
+  /// Get an obstacle from the pool for immediate reuse.
+  /// If no obstacles are available and the pool hasn't reached its max size, a new one is created.
+  /// Returns null if the pool is empty and at max capacity.
+  Obstacle? get() { // Changed method name from getObstacle to get, and no longer takes parameters
+    Obstacle? obstacle;
 
     if (_availableObstacles.isNotEmpty) {
       obstacle = _availableObstacles.removeFirst();
-
-      // Reset the obstacle for reuse
-      obstacle.position = position;
-      obstacle.size = size;
-      obstacle.obstacleSpeed = speed;
+      // Properties like position, size, and speed are now set by the ObstacleSpawner
+      // after it retrieves the obstacle from the pool.
+    } else if (_activeObstacles.length < _maxPoolSize) {
+      // If pool is empty but we haven't hit the max pool size, create a new obstacle.
+      obstacle = _createNewObstacle();
     } else {
-      // If pool is empty, create a new one on demand
-      obstacle = Firewall(
-        position: position,
-        size: size,
-        anchor: Anchor.center,
-        obstacleSpeed: speed,
-      );
+      // If pool is empty and at max size, we cannot provide an obstacle.
+      return null;
     }
 
-    _activeObstacles.add(obstacle);
+    if (obstacle != null) {
+      _activeObstacles.add(obstacle); // Mark as active
+    }
     return obstacle;
   }
 
-  /// Return an obstacle to the pool after it goes off-screen or is removed
+  /// Returns an obstacle to the pool, marking it as inactive.
+  /// The obstacle is added back to the available queue if the pool is not full.
   void returnObstacle(Obstacle obstacle) {
-    if (_activeObstacles.remove(obstacle)) {
+    if (_activeObstacles.remove(obstacle)) { // Remove from active set
+      // Optionally, reset obstacle's internal state here if it has one
+      // obstacle.reset(); // Uncomment if your Obstacle class has a reset method
+
       if (_availableObstacles.length < _maxPoolSize) {
-        _availableObstacles.add(obstacle);
+        _availableObstacles.add(obstacle); // Add back to available queue
       }
-      // Else: do nothing — the object can be collected by the GC
+      // If the pool is full, the obstacle is simply removed from active set
+      // and will be garbage collected (if no other references exist).
     }
   }
 
-  /// Clear and re-initialize the pool (useful for full game reset)
+  /// Clears both active and available obstacles, then re-initializes the pool.
+  /// Useful for a complete game reset.
   void clear() {
     _activeObstacles.clear();
     _availableObstacles.clear();
     _initializePool();
   }
 
-  // Optional: for debugging or dev tooling
+  // Optional getters for debugging or monitoring pool status.
   int get activeCount => _activeObstacles.length;
   int get availableCount => _availableObstacles.length;
 }

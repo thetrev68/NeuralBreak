@@ -1,47 +1,37 @@
+// lib/game/managers/ui_manager.dart
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
-import 'score_manager.dart';
-import 'life_manager.dart';
+import 'package:neural_break/game/managers/score_manager.dart';
+import 'package:neural_break/game/managers/life_manager.dart';
 
 class UIManager {
-  final ScoreManager scoreManager;
-  final LifeManager lifeManager;
+  final ScoreManager _scoreManager;
+  final LifeManager _lifeManager;
 
-  final TextComponent scoreText;
-  final TextComponent livesText;
-  final TextComponent levelText;
+  // These will hold references to the actual TextComponents from NeuralBreakGame
+  late TextComponent _scoreTextComponent;
+  late TextComponent _livesTextComponent;
+  late TextComponent _levelTextComponent;
 
   UIManager({
-    required this.scoreManager,
-    required this.lifeManager,
-    required Vector2 position,
-  })  : scoreText = TextComponent(
-          text: 'Score: ${scoreManager.score}',
-          position: position.clone(),
-          textRenderer: TextPaint(
-            style: TextStyle(fontSize: 20, color: Colors.white),
-          ),
-        ),
-        livesText = TextComponent(
-          text: 'Lives: ${lifeManager.lives}',
-          position: position + Vector2(0, 30),
-          textRenderer: TextPaint(
-            style: TextStyle(fontSize: 20, color: Colors.white),
-          ),
-        ),
-        levelText = TextComponent(
-          text: 'Level: ${scoreManager.level}',
-          position: position + Vector2(0, 60),
-          textRenderer: TextPaint(
-            style: TextStyle(fontSize: 20, color: Colors.white),
-          ),
-        );
+    required ScoreManager scoreManager,
+    required LifeManager lifeManager,
+  })  : _scoreManager = scoreManager,
+        _lifeManager = lifeManager;
 
-  List<TextComponent> get textComponents => [scoreText, livesText, levelText];
+  // Method called once from NeuralBreakGame.onLoad() to pass the TextComponent instances
+  void initializeTextComponents(
+      TextComponent scoreText,
+      TextComponent livesText,
+      TextComponent levelText) {
+    _scoreTextComponent = scoreText;
+    _livesTextComponent = livesText;
+    _levelTextComponent = levelText;
+  }
 
+  // Method to update the text content of the UI components
   void updateTexts() {
-    scoreText.text = 'Score: ${scoreManager.score}';
-    livesText.text = 'Lives: ${lifeManager.lives}';
-    levelText.text = 'Level: ${scoreManager.level}';
+    _scoreTextComponent.text = 'Score: ${_scoreManager.score}';
+    _livesTextComponent.text = 'Lives: ${_lifeManager.lives}';
+    _levelTextComponent.text = 'Level: ${_scoreManager.level}';
   }
 }

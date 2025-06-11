@@ -1,3 +1,4 @@
+// In lib/game/managers/score_manager.dart
 class ScoreManager {
   int _score = 0;
   int _level = 1;
@@ -23,5 +24,26 @@ class ScoreManager {
       return true;
     }
     return false;
+  }
+
+  /// Calculates the score target for the current level based on game constants.
+  int calculateLevelScoreTarget({
+    required double initialSpawnInterval,
+    required double spawnIntervalDecreasePerLevel,
+    required double minSpawnInterval,
+    required double levelDuration,
+    required int scorePerObstacle,
+  }) {
+    // Use internal _level and _score for calculation
+    final int currentLevel = _level;
+    final int currentScore = _score;
+
+    double spawnInterval = initialSpawnInterval - (currentLevel - 1) * spawnIntervalDecreasePerLevel;
+    if (spawnInterval < minSpawnInterval) {
+      spawnInterval = minSpawnInterval;
+    }
+
+    int estimatedObstacles = (levelDuration / spawnInterval).ceil();
+    return currentScore + (estimatedObstacles * scorePerObstacle);
   }
 }

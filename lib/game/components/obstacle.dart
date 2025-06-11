@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flame/collisions.dart';
 
 // Game-specific dependencies
-import 'package:neural_break/game/neural_break_game.dart';     // Game reference
-import 'package:neural_break/game/util/game_constants.dart';   // Constants like score per obstacle
+import 'package:neural_break/game/neural_break_game.dart'; // Game reference
+import 'package:neural_break/game/util/game_constants.dart'; // Constants like score per obstacle
 
 // Represents a falling obstacle in the game.
 // Moves downward each frame, triggers scoring when off-screen,
@@ -17,7 +17,7 @@ import 'package:neural_break/game/util/game_constants.dart';   // Constants like
 class Obstacle extends PositionComponent
     with
         HasGameReference<NeuralBreakGame>, // Gives access to gameRef
-        CollisionCallbacks {         // Enables collision handling
+        CollisionCallbacks { // Enables collision handling
 
   // Red paint used to draw the obstacle
   final Paint _paint = Paint()
@@ -25,18 +25,18 @@ class Obstacle extends PositionComponent
     ..style = PaintingStyle.fill;
 
   // Vertical movement speed in pixels per second
-  double obstacleSpeed;
+  double speed; // Renamed from obstacleSpeed for clarity and consistency
 
   // Debug helper: print only a few update logs
   int _updateCount = 0;
 
   // Constructor for the Obstacle
-  // Requires `obstacleSpeed` and optionally takes position, size, and anchor
+  // Requires `speed` and optionally takes position, size, and anchor
   Obstacle({
     super.position,
     super.size,
     super.anchor,
-    required this.obstacleSpeed,
+    required this.speed, // Updated to 'speed' to match spawner
   });
 
   // Called when the obstacle is added to the game
@@ -55,24 +55,30 @@ class Obstacle extends PositionComponent
   void update(double dt) {
     super.update(dt);
 
-    // Move the obstacle down based on its speed
-    position.y += obstacleSpeed * dt;
+    // Only update obstacle movement if the game is in the playing state
+    // This check is crucial for pausing game elements during level-up or game-over
+    if (game.gameStateManager.currentGameState != GameState.playing) {
+      return;
+    }
 
-    // Print debug output only for the first 5 updates
+    // Move the obstacle down based on its speed
+    position.y += speed * dt; // Using 'speed' property
+
+    // Print debug output only for the first few updates
     if (_updateCount < 5) {
       print(
         'Obstacle: $hashCode Update ${_updateCount++}, '
         'Y: ${position.y.toStringAsFixed(2)}, '
-        'Speed: ${obstacleSpeed.toStringAsFixed(2)}',
+        'Speed: ${speed.toStringAsFixed(2)}', // Using 'speed' property
       );
     }
 
     // If the obstacle goes off the bottom of the screen
+    // It is considered 'passed' and needs to be removed and possibly score points.
     if (position.y - size.y / 2 > game.size.y) {
-      if (game.gameState == GameState.playing) {
-        // Increase score if game is still in play
-        game.increaseScore(scorePerObstacle);
-      }
+      // Increase score if game is still in the playing state when obstacle leaves screen
+      // This prevents scoring during game over or paused states.
+      game.increaseScore(scorePerObstacle);
 
       print(
         'Obstacle: $hashCode Removed off-screen. '
@@ -94,7 +100,10 @@ class Obstacle extends PositionComponent
   void onRemove() {
     super.onRemove();
 
-    // Return to pool if we're in the main game context
+    // When an obstacle is removed, return it to the obstacle pool for reuse.
+    // This is important for memory management and performance.
+    // The check for `game is NeuralBreakGame` ensures we are in the correct game context
+    // before attempting to return to the pool.
     if (game is NeuralBreakGame) {
       (game as NeuralBreakGame).obstaclePool.returnObstacle(this);
     }

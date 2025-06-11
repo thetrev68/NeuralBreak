@@ -1,3 +1,4 @@
+// lib/game/components/firewall.dart
 // Core Flame and Flutter imports
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +16,10 @@ class Firewall extends Obstacle {
 
   /// Constructor passes all parameters up to the Obstacle superclass.
   Firewall({
-    required Vector2 super.position,     // Start position in the game world
-    required Vector2 super.size,         // Width and height
-    required Anchor super.anchor,        // Anchor point (usually center)
-    required super.obstacleSpeed,        // Speed at which it moves down
+    required super.position, // Start position in the game world
+    required super.size, // Width and height
+    required super.anchor, // Anchor point (usually center)
+    required super.speed, // <-- FIX: Changed from super.obstacleSpeed to super.speed
   });
 
   /// Custom rendering logic: draws a blue rectangle over the default one

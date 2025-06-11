@@ -3,7 +3,9 @@ enum GameState { playing, gameOver, levelUpPaused }
 class GameStateManager {
   GameState _state = GameState.playing;
 
-  GameState get state => _state;
+  // Renamed the getter from 'state' to 'currentGameState' for consistency
+  // with how it's being accessed in NeuralBreakGame and ObstacleSpawner.
+  GameState get currentGameState => _state;
 
   void setPlaying() {
     _state = GameState.playing;
