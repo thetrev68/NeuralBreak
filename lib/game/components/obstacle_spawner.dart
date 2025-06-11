@@ -1,4 +1,3 @@
-// lib/game/components/obstacle_spawner.dart
 // Dart standard random number generator
 import 'dart:math';
 
@@ -8,12 +7,13 @@ import 'package:flame/components.dart';
 // Reference to main game class and necessary game elements
 import 'package:neural_break/game/neural_break_game.dart';
 import 'package:neural_break/game/util/game_constants.dart';
+import 'package:neural_break/game/util/game_states.dart';
 import 'package:neural_break/game/managers/obstacle_pool.dart';
-import 'package:neural_break/game/components/obstacle.dart';
 
 /// Spawns obstacles into the game world at regular intervals.
 /// Adjusts speed and timing dynamically to scale game difficulty.
 class ObstacleSpawner extends Component with HasGameReference<NeuralBreakGame> {
+  // Use 'late' because it will be initialized in the constructor (indirectly via _initializeSpawnTimer)
   late TimerComponent _spawnTimerComponent;
   final ObstaclePool obstaclePool;
   double _currentSpawnInterval;
@@ -28,31 +28,36 @@ class ObstacleSpawner extends Component with HasGameReference<NeuralBreakGame> {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    _initializeSpawnTimer();
-    add(_spawnTimerComponent);
+    // Initialize and add the timer component
+    _initializeAndAddSpawnTimer(_currentSpawnInterval);
   }
 
-  void _initializeSpawnTimer() {
+  // Helper method to create and add the timer component
+  void _initializeAndAddSpawnTimer(double period) {
     _spawnTimerComponent = TimerComponent(
-      period: _currentSpawnInterval,
+      period: period,
       repeat: true,
       onTick: _spawnObstacle,
     );
+    add(_spawnTimerComponent);
   }
 
   void _spawnObstacle() {
+    // Ensure game is in playing state before spawning
     if (game.gameStateManager.currentGameState != GameState.playing) return;
 
     final laneIndex = _random.nextInt(numLanes);
     final lane = GameLane.values[laneIndex];
     final spawnX = getLaneX(lane, game.size.x);
-    final spawnY = -playerSize;
+    final spawnY =
+        -playerSize; // Assuming playerSize is appropriate for spawn Y
 
-    final obstacle = obstaclePool.get(); // This line might still be an issue if get() is not the method
+    final obstacle = obstaclePool.get(); // Get obstacle from pool
     if (obstacle != null) {
       obstacle.position = Vector2(spawnX, spawnY);
       obstacle.size = Vector2.all(playerSize);
-      obstacle.speed = _currentObstacleSpeed; // Assuming Obstacle has a 'speed' property
+      obstacle.speed =
+          _currentObstacleSpeed; // Assuming Obstacle has a 'speed' property
       game.add(obstacle);
     }
   }
@@ -66,20 +71,31 @@ class ObstacleSpawner extends Component with HasGameReference<NeuralBreakGame> {
   }
 
   void increaseDifficulty(int level) {
-    _currentSpawnInterval = (initialSpawnInterval - (level - 1) * spawnIntervalDecreasePerLevel)
-        .clamp(minSpawnInterval, initialSpawnInterval);
-    _currentObstacleSpeed = initialObstacleSpeed + (level - 1) * obstacleSpeedIncreasePerLevel;
+    // Calculate new intervals and speed
+    _currentSpawnInterval =
+        (initialSpawnInterval - (level - 1) * spawnIntervalDecreasePerLevel)
+            .clamp(minSpawnInterval, initialSpawnInterval);
+    _currentObstacleSpeed =
+        initialObstacleSpeed + (level - 1) * obstacleSpeedIncreasePerLevel;
 
-    // FIX: Access 'period' directly on the TimerComponent, not its internal timer.
-    _spawnTimerComponent.period = _currentSpawnInterval;
+    // FIX: Remove old timer and add a new one with the updated period
+    _spawnTimerComponent
+        .removeFromParent(); // This stops and removes the old timer
+    _initializeAndAddSpawnTimer(
+        _currentSpawnInterval); // Create and add new timer
+    print(
+        'Difficulty increased. New spawn interval: $_currentSpawnInterval, obstacle speed: $_currentObstacleSpeed');
   }
 
   void reset() {
     _currentObstacleSpeed = initialObstacleSpeed;
     _currentSpawnInterval = initialSpawnInterval;
 
-    // FIX: Access 'period' directly on the TimerComponent, not its internal timer.
-    _spawnTimerComponent.period = _currentSpawnInterval;
-    _spawnTimerComponent.timer.start();
+    // FIX: Remove old timer and add a new one with the reset period
+    _spawnTimerComponent.removeFromParent(); // Stop and remove old timer
+    _initializeAndAddSpawnTimer(
+        _currentSpawnInterval); // Create and add new timer
+    print(
+        'Spawner reset. Spawn interval: $_currentSpawnInterval, obstacle speed: $_currentObstacleSpeed');
   }
 }

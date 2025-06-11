@@ -50,7 +50,8 @@ class ObstaclePool {
   /// Get an obstacle from the pool for immediate reuse.
   /// If no obstacles are available and the pool hasn't reached its max size, a new one is created.
   /// Returns null if the pool is empty and at max capacity.
-  Obstacle? get() { // Changed method name from getObstacle to get, and no longer takes parameters
+  Obstacle? get() {
+    // Changed method name from getObstacle to get, and no longer takes parameters
     Obstacle? obstacle;
 
     if (_availableObstacles.isNotEmpty) {
@@ -65,16 +66,17 @@ class ObstaclePool {
       return null;
     }
 
-    if (obstacle != null) {
-      _activeObstacles.add(obstacle); // Mark as active
-    }
+    // Removed unnecessary null comparison as 'obstacle' is guaranteed to be non-null here,
+    // or the method would have already returned null.
+    _activeObstacles.add(obstacle); // Mark as active
     return obstacle;
   }
 
   /// Returns an obstacle to the pool, marking it as inactive.
   /// The obstacle is added back to the available queue if the pool is not full.
   void returnObstacle(Obstacle obstacle) {
-    if (_activeObstacles.remove(obstacle)) { // Remove from active set
+    if (_activeObstacles.remove(obstacle)) {
+      // Remove from active set
       // Optionally, reset obstacle's internal state here if it has one
       // obstacle.reset(); // Uncomment if your Obstacle class has a reset method
 

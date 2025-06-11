@@ -1,4 +1,4 @@
-enum GameState { playing, gameOver, levelUpPaused }
+import 'package:neural_break/game/util/game_states.dart';
 
 class GameStateManager {
   GameState _state = GameState.playing;

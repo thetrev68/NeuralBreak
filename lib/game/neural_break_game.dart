@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
 
-
+// Game Managers
 import 'package:neural_break/game/managers/score_manager.dart';
 import 'package:neural_break/game/managers/life_manager.dart';
 import 'package:neural_break/game/managers/game_state_manager.dart';
@@ -23,10 +23,11 @@ import 'package:neural_break/game/util/game_constants.dart';
 import 'package:neural_break/game/managers/obstacle_pool.dart';
 
 /// Defines possible game states
-enum GameState { playing, gameOver, levelUpPaused }
+import 'package:neural_break/game/util/game_states.dart';
 
 // The main game class. Manages all gameplay logic and components.
-class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCollisionDetection, TapCallbacks {
+class NeuralBreakGame extends FlameGame
+    with HasKeyboardHandlerComponents, HasCollisionDetection, TapCallbacks {
   // --- Game Managers ---
   late final ScoreManager scoreManager;
   late final LifeManager lifeManager;
@@ -37,12 +38,13 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
   late final InputManager inputManager;
   late final SceneManager sceneManager;
   late final ObstacleSpawner obstacleSpawner;
-  late final ObstaclePool obstaclePool; // ObstaclePool is a regular class, not a Component
+  late final ObstaclePool
+      obstaclePool; // ObstaclePool is a regular class, not a Component
 
   // --- Game Components that are *fields* of the game (can be added/removed directly) ---
   late final Player player;
   late final TextComponent _levelUpMessageText; // Declared here
-  late final TextComponent _gameOverText;      // Declared here
+  late final TextComponent _gameOverText; // Declared here
 
   // --- Game State Variables ---
   int _currentLevelScoreTarget = 0;
@@ -61,22 +63,26 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
       scoreManager: scoreManager,
       lifeManager: lifeManager,
     );
+    // Add this line to initialize inputManager before it's used
+    inputManager = InputManager(); // <-- Add this line here
+
     gameController = GameController(
       scoreManager: scoreManager,
       lifeManager: lifeManager,
       gameStateManager: gameStateManager,
       uiManager: uiManager,
-      inputManager: inputManager, // Passed to GameController
+      inputManager: inputManager, // Now 'inputManager' will be initialized
     );
     componentManager = ComponentManager(); // No 'player' needed in constructor
-    inputManager = InputManager(); // No 'onTapAction' needed in constructor
-    sceneManager = SceneManager(); // Assuming SceneManager constructor is default
+    sceneManager =
+        SceneManager(); // Assuming SceneManager constructor is default
 
     // Initialize Obstacle Pool and Spawner
     obstaclePool = ObstaclePool();
     // await add(obstaclePool); // REMOVED: ObstaclePool is not a Flame Component
     obstacleSpawner = ObstacleSpawner(obstaclePool: obstaclePool);
-    await add(obstacleSpawner); // ObstacleSpawner is a Component and needs to be added
+    await add(
+        obstacleSpawner); // ObstacleSpawner is a Component and needs to be added
 
     // Initialize Player
     player = Player();
@@ -88,29 +94,32 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
       position: Vector2(size.x / 2, 20),
       anchor: Anchor.topCenter,
       priority: 5,
-      textRenderer: TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
+      textRenderer:
+          TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
     );
     final livesTextComponent = TextComponent(
       text: 'Lives: ${lifeManager.lives}',
       position: Vector2(size.x - 20, 20),
       anchor: Anchor.topRight,
       priority: 5,
-      textRenderer: TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
+      textRenderer:
+          TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
     );
     final levelTextComponent = TextComponent(
       text: 'Level: ${scoreManager.level}',
       position: Vector2(20, 20),
       anchor: Anchor.topLeft,
       priority: 5,
-      textRenderer: TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
+      textRenderer:
+          TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
     );
 
     // Add UI text components to the game tree
     await addAll([scoreTextComponent, livesTextComponent, levelTextComponent]);
 
     // Pass the created text components to the UIManager
-    uiManager.initializeTextComponents(scoreTextComponent, livesTextComponent, levelTextComponent);
-
+    uiManager.initializeTextComponents(
+        scoreTextComponent, livesTextComponent, levelTextComponent);
 
     // Initialize the level up message text (declared above as a field)
     _levelUpMessageText = TextComponent(
@@ -118,7 +127,8 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
       position: size / 2,
       anchor: Anchor.center,
       priority: 10,
-      textRenderer: TextPaint(style: TextStyle(fontSize: 48, color: Colors.yellowAccent)),
+      textRenderer:
+          TextPaint(style: TextStyle(fontSize: 48, color: Colors.yellowAccent)),
     );
 
     // Initialize the game over message text (declared above as a field)
@@ -127,7 +137,9 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
       anchor: Anchor.center,
       position: size / 2,
       priority: 10,
-      textRenderer: TextPaint(style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+      textRenderer: TextPaint(
+          style: TextStyle(
+              color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
     );
 
     // Initial game state setup
@@ -147,7 +159,8 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
     if (gameStateManager.currentGameState == GameState.levelUpPaused) {
       if (!_levelUpEffectsAppliedForCurrentPause) {
         _levelUp(); // Trigger the level up effects (component manipulation, UI update)
-        _levelUpEffectsAppliedForCurrentPause = true; // Set flag to prevent repeated calls
+        _levelUpEffectsAppliedForCurrentPause =
+            true; // Set flag to prevent repeated calls
       }
       return; // Stop further game logic updates while paused for level up
     } else {
@@ -169,18 +182,19 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
 
   // Handles all tap input depending on game state and tap location
   @override
-  void onTapDown(TapDownEvent event) { // Corrected parameter type to TapDownEvent
+  void onTapDown(TapDownEvent event) {
+    // Corrected parameter type to TapDownEvent
     // If game is over, tap to restart
     if (gameStateManager.currentGameState == GameState.gameOver) {
       if (contains(_gameOverText)) {
-          remove(_gameOverText); // Remove the game over message from view
+        remove(_gameOverText); // Remove the game over message from view
       }
       _restartGame(); // Restart on game over tap
     }
     // If game is paused for level up, tap to continue
     else if (gameStateManager.currentGameState == GameState.levelUpPaused) {
       if (contains(_levelUpMessageText)) {
-          remove(_levelUpMessageText); // Remove level up message from view
+        remove(_levelUpMessageText); // Remove level up message from view
       }
       _continueGameAfterLevelUp(); // Resume after level-up
     }
@@ -198,11 +212,16 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
       final slideZoneBottom = slideZoneTop + slideTapZoneHeight;
 
       // Tap above player = jump
-      if (tapX >= jumpZoneLeft && tapX <= jumpZoneRight && tapY < playerCenterY) {
+      if (tapX >= jumpZoneLeft &&
+          tapX <= jumpZoneRight &&
+          tapY < playerCenterY) {
         player.applyJump();
       }
       // Tap below player = slide
-      else if (tapX >= jumpZoneLeft && tapX <= jumpZoneRight && tapY > slideZoneTop && tapY < slideZoneBottom) {
+      else if (tapX >= jumpZoneLeft &&
+          tapX <= jumpZoneRight &&
+          tapY > slideZoneTop &&
+          tapY < slideZoneBottom) {
         player.applySlide();
       }
       // Tap left = move left
@@ -218,9 +237,17 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
 
   // --- Input Handling ---
   @override
-  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+  KeyEventResult onKeyEvent(
+      KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     // Delegate input handling to InputManager
-    return inputManager.handleKeyEvent(event, keysPressed, player);
+    final result = inputManager.handleKeyEvent(event, keysPressed, player);
+
+    // If our input manager handled it, return that result.
+    // Otherwise, call super.onKeyEvent to allow other keyboard components or default Flame behavior to process it.
+    if (result == KeyEventResult.handled) {
+      return result;
+    }
+    return super.onKeyEvent(event, keysPressed); // Call super method
   }
 
   // --- Collision Handling ---
@@ -249,8 +276,10 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
   // ───── Game Logic Helpers ─────
 
   void loseLife() {
-    if (gameStateManager.currentGameState == GameState.playing) { // Use gameStateManager
-      lifeManager.loseLife(); // Assuming LifeManager has a method called loseLife()
+    if (gameStateManager.currentGameState == GameState.playing) {
+      // Use gameStateManager
+      lifeManager
+          .loseLife(); // Assuming LifeManager has a method called loseLife()
       uiManager.updateTexts(); // Update UI after life change
 
       if (lifeManager.lives <= 0) {
@@ -283,7 +312,8 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
   }
 
   void increaseScore(int amount) {
-    scoreManager.incrementScore(amount); // This will handle updating scoreManager.score
+    scoreManager
+        .incrementScore(amount); // This will handle updating scoreManager.score
     uiManager.updateTexts(); // Call the updateTexts method properly
 
     if (scoreManager.score >= _currentLevelScoreTarget) {
@@ -304,8 +334,10 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
   }
 
   void _continueGameAfterLevelUp() {
-    _levelUpMessageText.removeFromParent(); // Remove the message from the game tree
-    gameStateManager.setPlaying(); // Manually set state to playing after level up for now
+    _levelUpMessageText
+        .removeFromParent(); // Remove the message from the game tree
+    gameStateManager
+        .setPlaying(); // Manually set state to playing after level up for now
     // gameController.continueGameAfterLevelUp(); // Delegate state change to controller (if gameController manages state transition)
 
     player.reset(); // Reset player position/state
@@ -315,7 +347,9 @@ class NeuralBreakGame extends FlameGame with HasKeyboardHandlerComponents, HasCo
   void _restartGame() {
     gameController.restartGame(); // Delegates core reset logic to controller
     // Ensure componentManager's resetComponents can actually reset player and obstacles
-    componentManager.resetComponents(player: player, activeObstacles: children.whereType<Obstacle>().toList());
+    componentManager.resetComponents(
+        player: player,
+        activeObstacles: children.whereType<Obstacle>().toList());
     _calculateCurrentLevelScoreTarget(); // Recalculate target for new game
     uiManager.updateTexts(); // Update UI after restart
   }

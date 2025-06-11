@@ -10,6 +10,7 @@ import 'package:flame/collisions.dart';
 // Game-specific dependencies
 import 'package:neural_break/game/neural_break_game.dart'; // Game reference
 import 'package:neural_break/game/util/game_constants.dart'; // Constants like score per obstacle
+import 'package:neural_break/game/util/game_states.dart'; // Game states
 
 // Represents a falling obstacle in the game.
 // Moves downward each frame, triggers scoring when off-screen,
@@ -17,7 +18,8 @@ import 'package:neural_break/game/util/game_constants.dart'; // Constants like s
 class Obstacle extends PositionComponent
     with
         HasGameReference<NeuralBreakGame>, // Gives access to gameRef
-        CollisionCallbacks { // Enables collision handling
+        CollisionCallbacks {
+  // Enables collision handling
 
   // Red paint used to draw the obstacle
   final Paint _paint = Paint()
@@ -102,10 +104,6 @@ class Obstacle extends PositionComponent
 
     // When an obstacle is removed, return it to the obstacle pool for reuse.
     // This is important for memory management and performance.
-    // The check for `game is NeuralBreakGame` ensures we are in the correct game context
-    // before attempting to return to the pool.
-    if (game is NeuralBreakGame) {
-      (game as NeuralBreakGame).obstaclePool.returnObstacle(this);
-    }
+    (game).obstaclePool.returnObstacle(this);
   }
 }
