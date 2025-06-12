@@ -1,8 +1,9 @@
 // Core Flame & Flutter dependencies
+import 'dart:async';
 import 'package:flame/game.dart';
 import 'package:flame/events.dart';
-import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Game Managers
@@ -28,6 +29,10 @@ import 'package:neural_break/game/util/game_states.dart';
 // The main game class. Manages all gameplay logic and components.
 class NeuralBreakGame extends FlameGame
     with HasKeyboardHandlerComponents, HasCollisionDetection, TapCallbacks {
+  final TickerProvider tickerProvider;
+
+  NeuralBreakGame({required this.tickerProvider});
+
   // --- Game Managers ---
   late final ScoreManager scoreManager;
   late final LifeManager lifeManager;
@@ -51,44 +56,50 @@ class NeuralBreakGame extends FlameGame
   // Flag to ensure level up effects are applied only once per pause
   bool _levelUpEffectsAppliedForCurrentPause = false;
 
+  // Future that completes after onLoad finishes
+  late final Future<void> loadComplete;
+
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Initialize Managers
+    // Initialize Managers that don't depend on player first
     scoreManager = ScoreManager(levelUpThreshold: 100);
     lifeManager = LifeManager(initialLives: initialLives);
     gameStateManager = GameStateManager();
+
+    // Initialize Player early, because UIManager needs it
+    player = Player(tickerProvider: tickerProvider);
+    await add(player);
+
+    // Now initialize UIManager with player available
     uiManager = UIManager(
       scoreManager: scoreManager,
       lifeManager: lifeManager,
+      player: player,
     );
-    // Add this line to initialize inputManager before it's used
-    inputManager = InputManager(); // <-- Add this line here
 
+    // Initialize inputManager after UIManager
+    inputManager = InputManager();
+
+    // Initialize GameController with all dependencies ready
     gameController = GameController(
       scoreManager: scoreManager,
       lifeManager: lifeManager,
       gameStateManager: gameStateManager,
       uiManager: uiManager,
-      inputManager: inputManager, // Now 'inputManager' will be initialized
+      inputManager: inputManager,
     );
-    componentManager = ComponentManager(); // No 'player' needed in constructor
-    sceneManager =
-        SceneManager(); // Assuming SceneManager constructor is default
+
+    componentManager = ComponentManager();
+    sceneManager = SceneManager();
 
     // Initialize Obstacle Pool and Spawner
     obstaclePool = ObstaclePool();
-    // await add(obstaclePool); // REMOVED: ObstaclePool is not a Flame Component
     obstacleSpawner = ObstacleSpawner(obstaclePool: obstaclePool);
-    await add(
-        obstacleSpawner); // ObstacleSpawner is a Component and needs to be added
+    await add(obstacleSpawner);
 
-    // Initialize Player
-    player = Player();
-    await add(player);
-
-    // Initialize UI Text Components (these are local variables, passed to UIManager)
+    // Initialize UI Text Components
     final scoreTextComponent = TextComponent(
       text: 'Score: ${scoreManager.score}',
       position: Vector2(size.x / 2, 20),
@@ -117,13 +128,13 @@ class NeuralBreakGame extends FlameGame
     // Add UI text components to the game tree
     await addAll([scoreTextComponent, livesTextComponent, levelTextComponent]);
 
-    // Pass the created text components to the UIManager
+    // Pass text components to UIManager
     uiManager.initializeTextComponents(
         scoreTextComponent, livesTextComponent, levelTextComponent);
 
-    // Initialize the level up message text (declared above as a field)
+    // Initialize level up message text
     _levelUpMessageText = TextComponent(
-      text: levelUpMessage, // Using constant
+      text: levelUpMessage,
       position: size / 2,
       anchor: Anchor.center,
       priority: 10,
@@ -131,19 +142,20 @@ class NeuralBreakGame extends FlameGame
           TextPaint(style: TextStyle(fontSize: 48, color: Colors.yellowAccent)),
     );
 
-    // Initialize the game over message text (declared above as a field)
+    // Initialize game over message text
     _gameOverText = TextComponent(
-      text: gameOverMessage, // Using constant
+      text: gameOverMessage,
       anchor: Anchor.center,
       position: size / 2,
       priority: 10,
       textRenderer: TextPaint(
-          style: TextStyle(
-              color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+        style: TextStyle(
+            color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+      ),
     );
 
     // Initial game state setup
-    _restartGame(); // Call restart to set up initial state
+    _restartGame();
   }
 
   // Set game background

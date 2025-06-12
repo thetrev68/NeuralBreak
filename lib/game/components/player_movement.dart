@@ -9,7 +9,8 @@ import 'package:neural_break/game/neural_break_game.dart';
 
 // Adds horizontal lane-based movement to the component.
 // Requires the component to mix in HasGameReference<NeuralBreakGame>.
-mixin PlayerMovement on PositionComponent, HasGameReference<NeuralBreakGame> { // <--- NEW
+mixin PlayerMovement on PositionComponent, HasGameReference<NeuralBreakGame> {
+  // <--- NEW
   // Internal X target for movement interpolation
   double _internalTargetX = 0.0;
 
@@ -23,7 +24,8 @@ mixin PlayerMovement on PositionComponent, HasGameReference<NeuralBreakGame> { /
   void initializeMovement() {
     // OLD: final game = (this as HasGameReference<NeuralBreakGame>).game;
     // NEW:
-    _internalTargetX = getLaneX(_currentLane, game.size.x); // Use 'game' directly
+    _internalTargetX =
+        getLaneX(_currentLane, game.size.x); // Use 'game' directly
     position.x = _internalTargetX; // Set initial horizontal position
   }
 
@@ -31,7 +33,8 @@ mixin PlayerMovement on PositionComponent, HasGameReference<NeuralBreakGame> { /
   void updateMovement(double dt) {
     final deltaX = _internalTargetX - position.x;
     if (deltaX.abs() > 0.1) {
-      final step = playerMoveSpeed * dt; // Calculate movement step based on time
+      final step =
+          playerMoveSpeed * dt; // Calculate movement step based on time
       // Move either the remaining distance or one step, whichever is smaller
       position.x += deltaX.abs() < step ? deltaX : deltaX.sign * step;
     }
@@ -70,7 +73,8 @@ mixin PlayerMovement on PositionComponent, HasGameReference<NeuralBreakGame> { /
   // Recalculates target X based on the current lane
   void _updateTargetX() {
     // OLD: final mygame = game;
-    _internalTargetX = getLaneX(_currentLane, game.size.x); // Use 'game' directly
+    _internalTargetX =
+        getLaneX(_currentLane, game.size.x); // Use 'game' directly
   }
 
   // Reset lane to center and reinitialize X position

@@ -1,80 +1,83 @@
-// Flutter UI framework
 import 'package:flutter/material.dart';
-
-// Flame's widget to embed the game
-import 'package:flame/game.dart';
-
-// Controls device orientation
 import 'package:flutter/services.dart';
-
-// Your custom game implementation
 import 'package:neural_break/game/neural_break_game.dart';
+import 'package:neural_break/game/managers/score_manager.dart';
+import 'package:neural_break/game/managers/life_manager.dart';
+import 'package:neural_break/game/managers/ui_manager.dart';
+import 'package:neural_break/screens/game_screen.dart';
 
 void main() {
-  // Ensures Flutter's widget system is fully initialized before starting
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Lock the app to portrait orientation only
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // Start the app by running the custom Flutter widget tree
   runApp(const NeuralBreakApp());
 }
 
-/// The root widget of the app, hosting the theme and home screen
 class NeuralBreakApp extends StatelessWidget {
   const NeuralBreakApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Initialize Flame game & UIManager here because we need both for GameScreen
     return MaterialApp(
       title: 'Neural Break',
-
-      // Uses a dark theme with a blue accent
       theme: ThemeData.dark().copyWith(
-        colorScheme: ColorScheme.dark(
-          primary: Colors.blue,
-        ),
+        colorScheme: ColorScheme.dark(primary: Colors.blue),
       ),
-
-      // Sets the first screen of the app
-      home: const GameScreen(),
-
-      // Removes the "debug" banner
+      home: const RootWidget(), // We delegate to a RootWidget to setup game
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-/// Hosts the actual game screen using Flame's GameWidget
-class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+class RootWidget extends StatefulWidget {
+  const RootWidget({super.key});
 
   @override
-  State<GameScreen> createState() => _GameScreenState();
+  State<RootWidget> createState() => _RootWidgetState();
 }
 
-class _GameScreenState extends State<GameScreen> {
-  // Instance of your Flame game
+class _RootWidgetState extends State<RootWidget>
+    with SingleTickerProviderStateMixin {
   late final NeuralBreakGame game;
+  late final ScoreManager scoreManager;
+  late final LifeManager lifeManager;
+
+  UIManager? uiManager;
 
   @override
   void initState() {
     super.initState();
-    game = NeuralBreakGame(); // Create the game once during widget initialization
+
+    scoreManager = ScoreManager(levelUpThreshold: 100);
+    lifeManager = LifeManager(initialLives: 3);
+
+    game = NeuralBreakGame(tickerProvider: this);
+
+    // Wait until game.onLoad() is complete and player is ready
+    game.loaded.then((_) {
+      setState(() {
+        uiManager = UIManager(
+          scoreManager: scoreManager,
+          lifeManager: lifeManager,
+          player: game.player,
+        );
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // Embeds the Flame game inside the widget tree
-      body: GameWidget<NeuralBreakGame>.controlled(
-        gameFactory: () => game, // Provides the game instance
-        // You can later add overlayBuilderMap: {} here for menus and HUD
-      ),
-    );
+    if (uiManager == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return GameScreen(game: game, uiManager: uiManager!);
   }
 }
