@@ -1,15 +1,14 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/collisions.dart';
-
 import 'package:neural_break/game/neural_break_game.dart';
 import 'package:neural_break/game/util/game_constants.dart';
 import 'package:neural_break/game/components/player_movement.dart';
 import 'package:neural_break/game/components/player_jump.dart';
 import 'package:neural_break/game/components/player_slide.dart';
 import 'package:neural_break/game/components/obstacle.dart';
-
 import 'package:neural_break/widgets/avatars/pulse_runner_controller.dart';
+import 'package:flutter/foundation.dart'; // for kDebugMode print
 
 class Player extends PositionComponent
     with
@@ -18,13 +17,12 @@ class Player extends PositionComponent
         PlayerMovement,
         PlayerJump,
         PlayerSlide {
-  // static final _playerPaint = Paint()
-  //   ..color = Colors.white
-  //   ..style = PaintingStyle.fill;
+  // static final _playerPaint = Paint() // Keep this commented out
+  //   ..color = Colors.white
+  //   ..style = PaintingStyle.fill;
 
   final PulseRunnerController poseController;
 
-  // You must pass a TickerProvider here — see next step
   Player({required TickerProvider tickerProvider})
       : poseController = PulseRunnerController(tickerProvider),
         super(
@@ -34,12 +32,24 @@ class Player extends PositionComponent
 
   @override
   Future<void> onLoad() async {
+    if (kDebugMode) {
+      print('Player: onLoad started');
+    }
     await super.onLoad();
     initializeMovement();
-    position.y = game.size.y - size.y * 2;
+    position.y = getGroundY(game.size.y, playerSize);
     initializeJump();
     initializeSlide();
     add(RectangleHitbox());
+
+    // Remove the previous attempts to add/listen to poseController for rendering
+    // since the rendering happens via AvatarDisplayWidget.
+    // if (poseController.runnerComponent != null) { ... }
+    // poseController.addListener(_onPoseChanged);
+
+    if (kDebugMode) {
+      print('Player: onLoad completed');
+    }
   }
 
   @override
@@ -48,12 +58,14 @@ class Player extends PositionComponent
     updateMovement(dt);
     updateJump(dt);
     updateSlide(dt);
+    // No explicit call to poseController.update(dt) if it doesn't have one.
+    // Its internal AnimationController handles the timing.
   }
 
   // @override
-  // void render(Canvas canvas) {
-  //  super.render(canvas);
-  //  canvas.drawRect(size.toRect(), _playerPaint); // removed to use avatar
+  // void render(Canvas canvas) { // Keep this commented out
+  //  super.render(canvas);
+  //  canvas.drawRect(size.toRect(), _playerPaint);
   // }
 
   @override
@@ -69,7 +81,7 @@ class Player extends PositionComponent
     resetMovement();
     resetJump();
     resetSlide();
-    position.y = game.size.y - size.y * 2;
+    position.y = getGroundY(game.size.y, playerSize);
   }
 
   void stopAllActions() {
@@ -80,28 +92,33 @@ class Player extends PositionComponent
 
   void applyJump() {
     jump();
-    poseController.jump();
+    poseController
+        .jump(); // Still call poseController to change internal pose state
   }
 
   void applySlide() {
     slide();
-    poseController.slide();
+    poseController
+        .slide(); // Still call poseController to change internal pose state
   }
 
   @override
   void moveLeft() {
     super.moveLeft();
-    poseController.run();
+    poseController
+        .run(); // Still call poseController to change internal pose state
   }
 
   @override
   void moveRight() {
     super.moveRight();
-    poseController.run();
+    poseController
+        .run(); // Still call poseController to change internal pose state
   }
 
   @override
   void onRemove() {
+    // poseController.removeListener(_onPoseChanged); // Remove this line
     poseController.dispose();
     super.onRemove();
   }

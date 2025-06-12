@@ -1,3 +1,5 @@
+June 8, 2025: Beginning. Proposal from Gemini 2.5 Flash
+
 # Game Design Document (GDD) - Neural Break
 
 ## 1. Concept Summary

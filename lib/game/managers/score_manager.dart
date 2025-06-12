@@ -1,26 +1,35 @@
-// In lib/game/managers/score_manager.dart
+// lib/game/managers/score_manager.dart
+import 'package:flutter/foundation.dart'; // Import for ValueNotifier
+
 class ScoreManager {
-  int _score = 0;
-  int _level = 1;
+  // Change _score and _level to ValueNotifier
+  final ValueNotifier<int> _score = ValueNotifier(0);
+  final ValueNotifier<int> _level = ValueNotifier(1);
   final int levelUpThreshold;
 
   ScoreManager({this.levelUpThreshold = 100});
 
-  int get score => _score;
-  int get level => _level;
+  // Expose ValueNotifier getters
+  ValueNotifier<int> get scoreNotifier => _score;
+  ValueNotifier<int> get levelNotifier => _level;
+
+  // Keep plain getters for convenience within the game logic
+  int get score => _score.value;
+  int get level => _level.value;
 
   void reset() {
-    _score = 0;
-    _level = 1;
+    _score.value = 0; // Update ValueNotifier's value
+    _level.value = 1; // Update ValueNotifier's value
   }
 
   void incrementScore(int amount) {
-    _score += amount;
+    _score.value += amount; // Update ValueNotifier's value
   }
 
   bool checkLevelUp() {
-    if (_score >= _level * levelUpThreshold) {
-      _level++;
+    // Use .value for checking conditions
+    if (_score.value >= _level.value * levelUpThreshold) {
+      _level.value++; // Update ValueNotifier's value
       return true;
     }
     return false;
@@ -34,11 +43,12 @@ class ScoreManager {
     required double levelDuration,
     required int scorePerObstacle,
   }) {
-    // Use internal _level and _score for calculation
-    final int currentLevel = _level;
-    final int currentScore = _score;
+    // Use .value for calculation
+    final int currentLevel = _level.value;
+    final int currentScore = _score.value;
 
-    double spawnInterval = initialSpawnInterval - (currentLevel - 1) * spawnIntervalDecreasePerLevel;
+    double spawnInterval = initialSpawnInterval -
+        (currentLevel - 1) * spawnIntervalDecreasePerLevel;
     if (spawnInterval < minSpawnInterval) {
       spawnInterval = minSpawnInterval;
     }

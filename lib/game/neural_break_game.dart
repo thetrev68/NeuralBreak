@@ -1,3 +1,4 @@
+// lib/game/neural_break_game.dart
 // Core Flame & Flutter dependencies
 import 'dart:async';
 import 'package:flame/game.dart';
@@ -5,6 +6,7 @@ import 'package:flame/events.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart'; // Added for kDebugMode
 
 // Game Managers
 import 'package:neural_break/game/managers/score_manager.dart';
@@ -20,7 +22,7 @@ import 'package:neural_break/game/managers/scene_manager.dart';
 import 'package:neural_break/game/components/player.dart';
 import 'package:neural_break/game/components/obstacle.dart';
 import 'package:neural_break/game/components/obstacle_spawner.dart';
-import 'package:neural_break/game/util/game_constants.dart';
+import 'package:neural_break/game/util/game_constants.dart'; // Contains constants like initialLives, gameOverMessage, etc.
 import 'package:neural_break/game/managers/obstacle_pool.dart';
 
 /// Defines possible game states
@@ -56,109 +58,174 @@ class NeuralBreakGame extends FlameGame
   // Flag to ensure level up effects are applied only once per pause
   bool _levelUpEffectsAppliedForCurrentPause = false;
 
-  // Future that completes after onLoad finishes
-  late final Future<void> loadComplete;
+  // The 'loaded' Future is managed internally by FlameGame now that GameWidget is used.
+  // late final Future<void> loadComplete; // No longer manually exposed or needed this way
 
   @override
   Future<void> onLoad() async {
-    await super.onLoad();
+    if (kDebugMode) {
+      print('NeuralBreakGame: onLoad started (STEP 3: Inside onLoad)');
+    }
+    await super.onLoad(); // IMPORTANT: Call super.onLoad() first
+    if (kDebugMode) {
+      print('NeuralBreakGame: super.onLoad completed (STEP 4)');
+    }
 
-    // Initialize Managers that don't depend on player first
-    scoreManager = ScoreManager(levelUpThreshold: 100);
-    lifeManager = LifeManager(initialLives: initialLives);
-    gameStateManager = GameStateManager();
+    try {
+      // Initialize Managers that don't depend on player first
+      scoreManager = ScoreManager(levelUpThreshold: 100);
+      lifeManager = LifeManager(
+          initialLives:
+              initialLives); // Using constant from game_constants.dart
+      gameStateManager = GameStateManager();
+      if (kDebugMode) {
+        print('NeuralBreakGame: Core Managers initialized (STEP 5)');
+      }
 
-    // Initialize Player early, because UIManager needs it
-    player = Player(tickerProvider: tickerProvider);
-    await add(player);
+      // Initialize Player early, because UIManager needs it
+      player = Player(tickerProvider: tickerProvider);
+      if (kDebugMode) {
+        print('NeuralBreakGame: Player instance created (STEP 6)');
+      }
+      await add(player); // Add player as a component to the game tree
+      if (kDebugMode) {
+        print('NeuralBreakGame: Player added to game tree (STEP 7)');
+      }
 
-    // Now initialize UIManager with player available
-    uiManager = UIManager(
-      scoreManager: scoreManager,
-      lifeManager: lifeManager,
-      player: player,
-    );
+      // Now initialize UIManager with player available
+      uiManager = UIManager(
+        scoreManager: scoreManager,
+        lifeManager: lifeManager,
+        player: player,
+      );
+      if (kDebugMode) {
+        print('NeuralBreakGame: UIManager initialized (STEP 8)');
+      }
 
-    // Initialize inputManager after UIManager
-    inputManager = InputManager();
+      // Initialize inputManager after UIManager
+      inputManager = InputManager();
+      if (kDebugMode) {
+        print('NeuralBreakGame: InputManager initialized (STEP 9)');
+      }
 
-    // Initialize GameController with all dependencies ready
-    gameController = GameController(
-      scoreManager: scoreManager,
-      lifeManager: lifeManager,
-      gameStateManager: gameStateManager,
-      uiManager: uiManager,
-      inputManager: inputManager,
-    );
+      // Initialize GameController with all dependencies ready
+      gameController = GameController(
+        scoreManager: scoreManager,
+        lifeManager: lifeManager,
+        gameStateManager: gameStateManager,
+        uiManager: uiManager,
+        inputManager: inputManager,
+      );
+      if (kDebugMode) {
+        print('NeuralBreakGame: GameController initialized (STEP 10)');
+      }
 
-    componentManager = ComponentManager();
-    sceneManager = SceneManager();
+      componentManager = ComponentManager();
+      sceneManager = SceneManager();
+      if (kDebugMode) {
+        print(
+            'NeuralBreakGame: ComponentManager and SceneManager initialized (STEP 11)');
+      }
 
-    // Initialize Obstacle Pool and Spawner
-    obstaclePool = ObstaclePool();
-    obstacleSpawner = ObstacleSpawner(obstaclePool: obstaclePool);
-    await add(obstacleSpawner);
+      // Initialize Obstacle Pool and Spawner
+      obstaclePool = ObstaclePool();
+      obstacleSpawner = ObstacleSpawner(obstaclePool: obstaclePool);
+      if (kDebugMode) {
+        print(
+            'NeuralBreakGame: ObstaclePool and Spawner initialized (STEP 12)');
+      }
+      await add(obstacleSpawner); // Add spawner as a component to the game tree
+      if (kDebugMode) {
+        print('NeuralBreakGame: ObstacleSpawner added to game tree (STEP 13)');
+      }
 
-    // Initialize UI Text Components
-    final scoreTextComponent = TextComponent(
-      text: 'Score: ${scoreManager.score}',
-      position: Vector2(size.x / 2, 20),
-      anchor: Anchor.topCenter,
-      priority: 5,
-      textRenderer:
-          TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
-    );
-    final livesTextComponent = TextComponent(
-      text: 'Lives: ${lifeManager.lives}',
-      position: Vector2(size.x - 20, 20),
-      anchor: Anchor.topRight,
-      priority: 5,
-      textRenderer:
-          TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
-    );
-    final levelTextComponent = TextComponent(
-      text: 'Level: ${scoreManager.level}',
-      position: Vector2(20, 20),
-      anchor: Anchor.topLeft,
-      priority: 5,
-      textRenderer:
-          TextPaint(style: TextStyle(fontSize: 20, color: Colors.white)),
-    );
+      // Initialize UI Text Components
+      final scoreTextComponent = TextComponent(
+        text: 'Score: ${scoreManager.score}',
+        position: Vector2(size.x / 2, 20),
+        anchor: Anchor.topCenter,
+        priority: 5,
+        textRenderer: TextPaint(
+            style: const TextStyle(fontSize: 20, color: Colors.white)),
+      );
+      final livesTextComponent = TextComponent(
+        text: 'Lives: ${lifeManager.lives}',
+        position: Vector2(size.x - 20, 20),
+        anchor: Anchor.topRight,
+        priority: 5,
+        textRenderer: TextPaint(
+            style: const TextStyle(fontSize: 20, color: Colors.white)),
+      );
+      final levelTextComponent = TextComponent(
+        text: 'Level: ${scoreManager.level}',
+        position: Vector2(20, 20),
+        anchor: Anchor.topLeft,
+        priority: 5,
+        textRenderer: TextPaint(
+            style: const TextStyle(fontSize: 20, color: Colors.white)),
+      );
 
-    // Add UI text components to the game tree
-    await addAll([scoreTextComponent, livesTextComponent, levelTextComponent]);
+      // Add UI text components to the game tree
+      await addAll(
+          [scoreTextComponent, livesTextComponent, levelTextComponent]);
+      if (kDebugMode) {
+        print('NeuralBreakGame: UI Text Components added (STEP 14)');
+      }
 
-    // Pass text components to UIManager
-    uiManager.initializeTextComponents(
-        scoreTextComponent, livesTextComponent, levelTextComponent);
+      // Pass text components to UIManager
+      uiManager.initializeTextComponents(
+          scoreTextComponent, livesTextComponent, levelTextComponent);
+      if (kDebugMode) {
+        print(
+            'NeuralBreakGame: UIManager text components initialized (STEP 15)');
+      }
 
-    // Initialize level up message text
-    _levelUpMessageText = TextComponent(
-      text: levelUpMessage,
-      position: size / 2,
-      anchor: Anchor.center,
-      priority: 10,
-      textRenderer:
-          TextPaint(style: TextStyle(fontSize: 48, color: Colors.yellowAccent)),
-    );
+      // Initialize level up message text
+      _levelUpMessageText = TextComponent(
+        text: levelUpMessage, // Using constant from game_constants.dart
+        position: size / 2,
+        anchor: Anchor.center,
+        priority: 10,
+        textRenderer: TextPaint(
+            style: const TextStyle(fontSize: 48, color: Colors.yellowAccent)),
+      );
+      if (kDebugMode) {
+        print('NeuralBreakGame: Level Up Message Text initialized (STEP 16)');
+      }
 
-    // Initialize game over message text
-    _gameOverText = TextComponent(
-      text: gameOverMessage,
-      anchor: Anchor.center,
-      position: size / 2,
-      priority: 10,
-      textRenderer: TextPaint(
-        style: TextStyle(
-            color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
-      ),
-    );
+      // Initialize game over message text
+      _gameOverText = TextComponent(
+        text: gameOverMessage, // Using constant from game_constants.dart
+        anchor: Anchor.center,
+        position: size / 2,
+        priority: 10,
+        textRenderer: TextPaint(
+          style: const TextStyle(
+              color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+        ),
+      );
+      if (kDebugMode) {
+        print('NeuralBreakGame: Game Over Message Text initialized (STEP 17)');
+      }
 
-    // Initial game state setup
-    _restartGame();
+      // Initial game state setup
+      _restartGame(); // This method might have its own issues.
+      if (kDebugMode) {
+        print('NeuralBreakGame: _restartGame called (STEP 18)');
+      }
+
+      if (kDebugMode) {
+        print('NeuralBreakGame: onLoad completed successfully! (STEP 19)');
+      }
+    } catch (e, s) {
+      if (kDebugMode) {
+        print('NeuralBreakGame: FATAL ERROR in onLoad(): $e');
+        print('Stack Trace: $s');
+      }
+      rethrow; // Re-throw the error so RootWidgetState can potentially catch it
+    }
   }
 
-  // Set game background
   @override
   Color backgroundColor() => Colors.black;
 
@@ -166,6 +233,7 @@ class NeuralBreakGame extends FlameGame
   void update(double dt) {
     super.update(dt); // IMPORTANT: Always call super.update(dt) first
 
+    // ... (rest of your update method)
     // --- NEW LEVEL UP LOGIC START ---
     // Check for level up pause state and trigger effects once
     if (gameStateManager.currentGameState == GameState.levelUpPaused) {
@@ -262,28 +330,13 @@ class NeuralBreakGame extends FlameGame
     return super.onKeyEvent(event, keysPressed); // Call super method
   }
 
-  // --- Collision Handling ---
-  // Ensure your components like Player and Obstacle have the HasCollisionDetection mixin
-  // and implement onCollisionStart.
-  // Example for Player (if it detects collisions with Obstacle):
-  // @override
-  // void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
-  //   super.onCollisionStart(intersectionPoints, other);
-  //   if (other is Obstacle) {
-  //     gameController.onPlayerHit(); // Notify game controller about player hit
-  //     other.removeFromParent(); // Remove obstacle on collision
-  //   }
-  // }
-  // Example for Obstacle (if it detects collisions with Firewall for scoring):
-  // @override
-  // void onCollisionEnd(PositionComponent other) {
-  //   super.onCollisionEnd(other);
-  //   // If obstacle passes firewall, or is destroyed, increment score
-  //   if (other is Firewall) { // Assuming you have a Firewall component
-  //     gameController.onScore(scorePerObstacle);
-  //     removeFromParent(); // Remove the obstacle
-  //   }
-  // }
+  @override
+  void onRemove() {
+    super.onRemove();
+    if (kDebugMode) {
+      print('NeuralBreakGame: onRemove called. Game is being removed.');
+    }
+  }
 
   // ───── Game Logic Helpers ─────
 
