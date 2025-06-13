@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flame/collisions.dart';
 
 // Game-specific dependencies
-import 'package:neural_break/features/gameplay/presentation/pages/neural_break_game.dart'; // Game reference
+import 'package:neural_break/features/gameplay/engine/neural_break_game.dart'; // Game reference
 import 'package:neural_break/core/constants/game_constants.dart'; // Constants like score per obstacle
 import 'package:neural_break/core/constants/game_states.dart'; // Game states
 

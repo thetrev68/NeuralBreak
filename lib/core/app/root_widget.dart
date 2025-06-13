@@ -4,7 +4,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:neural_break/core/constants/game_constants.dart';
-import 'package:neural_break/features/gameplay/presentation/pages/neural_break_game.dart';
+import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
 
 import '../../features/gameplay/presentation/widgets/avatars/avatar_display_widget.dart';
 

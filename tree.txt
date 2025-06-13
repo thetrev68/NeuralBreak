@@ -1,26 +1,30 @@
 ├── .gitignore
 ├── .metadata
 ├── analysis_options.yaml
+├── devtools_options.yaml
+├── docs
+│   ├── GameDesignDocument.md
+│   ├── game_structure.md
+│   ├── neuralbreak_enhancements_from_claude.md
+│   ├── neuralbreak_refactor_fix_checklist.md
+│   ├── refactoring_end_state_gemini.md
+│   └── refactor_20250613.md
 ├── lib
 │   ├── assets
 │   │   ├── audio
 │   │   └── images
 │   ├── core
+│   │   ├── app
+│   │   │   ├── app_widget.dart
+│   │   │   ├── game_initializer.dart
+│   │   │   └── root_widget.dart
 │   │   ├── constants
 │   │   │   ├── game_constants.dart
 │   │   │   └── game_states.dart
 │   │   ├── error
 │   │   ├── routes
 │   │   ├── services
-│   │   └── widgets
-│   ├── data
-│   ├── docs
-│   │   ├── GameDesignDocument.md
-│   │   ├── game_structure.md
-│   │   ├── neuralbreak_enhancements_from_claude.md
-│   │   ├── neuralbreak_refactor_fix_checklist.md
-│   │   ├── README.md
-│   │   └── refactoring_end_state_gemini.md
+│   │   └── shared_widgets
 │   ├── features
 │   │   ├── gameplay
 │   │   │   ├── data
@@ -41,6 +45,7 @@
 │   │   │   │       ├── player_movement.dart
 │   │   │   │       ├── player_slide.dart
 │   │   │   │       └── score_manager.dart
+│   │   │   ├── engine
 │   │   │   └── presentation
 │   │   │       ├── bloc
 │   │   │       │   ├── game_controller.dart
@@ -78,4 +83,6 @@
 ├── neural_break.iml
 ├── pubspec.lock
 ├── pubspec.yaml
-└── tree.mjs
+├── README.md
+├── tree.mjs
+└── tree.txt

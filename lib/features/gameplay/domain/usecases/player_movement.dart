@@ -5,7 +5,7 @@ import 'package:flame/components.dart';
 import 'package:neural_break/core/constants/game_constants.dart';
 
 // Access to the main game class for gameRef usage
-import 'package:neural_break/features/gameplay/presentation/pages/neural_break_game.dart';
+import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
 
 // Adds horizontal lane-based movement to the component.
 // Requires the component to mix in HasGameReference<NeuralBreakGame>.

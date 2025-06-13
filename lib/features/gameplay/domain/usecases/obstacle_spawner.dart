@@ -6,7 +6,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/foundation.dart';
 
 // Reference to main game class and necessary game elements
-import 'package:neural_break/features/gameplay/presentation/pages/neural_break_game.dart';
+import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
 import 'package:neural_break/core/constants/game_constants.dart';
 import 'package:neural_break/core/constants/game_states.dart';
 import 'package:neural_break/features/gameplay/data/datasources/obstacle_pool.dart';

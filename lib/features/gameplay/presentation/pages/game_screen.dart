@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
-import 'package:neural_break/features/gameplay/presentation/pages/neural_break_game.dart';
+import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
 import 'package:neural_break/features/gameplay/presentation/components/ui_manager.dart';
 import 'package:neural_break/features/gameplay/presentation/widgets/avatars/avatar_display_widget.dart';
 
