@@ -5,10 +5,10 @@ import 'package:neural_break/features/gameplay/domain/usecases/score_manager.dar
 import 'package:neural_break/features/gameplay/domain/usecases/life_manager.dart';
 import 'package:neural_break/features/gameplay/domain/entities/player.dart';
 
-import 'package:neural_break/widgets/avatars/pulse_runner_controller.dart';
-import 'package:neural_break/widgets/avatars/pulse_runner_running.dart';
-import 'package:neural_break/widgets/avatars/pulse_runner_jump.dart';
-import 'package:neural_break/widgets/avatars/pulse_runner_slide.dart';
+import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_controller.dart';
+import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_running.dart';
+import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_jump.dart';
+import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_slide.dart';
 
 class UIManager {
   final ScoreManager _scoreManager;

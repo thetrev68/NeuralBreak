@@ -118,7 +118,7 @@ This is the most significant part. We'll primarily map your `lib/game` contents 
 
 **Phase 4: Migrate Screens & Widgets**
 
-1.  **`lib/screens/game_screen.dart`**:
+1.  **`lib/screens/game_screen.dart`**:*
     * **Move To:** `lib/features/gameplay/presentation/pages/game_screen.dart`
     * **Action:** This is the main Flutter UI screen where your game runs.
 

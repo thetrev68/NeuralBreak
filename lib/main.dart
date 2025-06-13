@@ -5,7 +5,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart'; // Import for kDebugMode
 
 import 'package:neural_break/features/gameplay/presentation/pages/neural_break_game.dart';
-import 'package:neural_break/widgets/avatars/avatar_display_widget.dart';
+import 'package:neural_break/features/gameplay/presentation/widgets/avatars/avatar_display_widget.dart';
 import 'package:neural_break/core/constants/game_constants.dart';
 
 void main() {

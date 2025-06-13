@@ -7,7 +7,7 @@ import 'package:neural_break/features/gameplay/domain/usecases/player_movement.d
 import 'package:neural_break/features/gameplay/domain/usecases/player_jump.dart';
 import 'package:neural_break/features/gameplay/domain/usecases/player_slide.dart';
 import 'package:neural_break/features/gameplay/domain/entities/obstacle.dart';
-import 'package:neural_break/widgets/avatars/pulse_runner_controller.dart';
+import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_controller.dart';
 import 'package:flutter/foundation.dart'; // for kDebugMode print
 
 class Player extends PositionComponent
