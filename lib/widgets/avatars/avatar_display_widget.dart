@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:neural_break/game/managers/ui_manager.dart';
+import 'package:neural_break/features/gameplay/presentation/components/ui_manager.dart';
 
 class AvatarDisplayWidget extends StatefulWidget {
   final UIManager uiManager;

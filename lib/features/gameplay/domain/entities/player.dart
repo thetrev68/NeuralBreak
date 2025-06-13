@@ -1,12 +1,12 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/collisions.dart';
-import 'package:neural_break/game/neural_break_game.dart';
+import 'package:neural_break/features/gameplay/presentation/pages/neural_break_game.dart';
 import 'package:neural_break/core/constants/game_constants.dart';
-import 'package:neural_break/game/components/player_movement.dart';
-import 'package:neural_break/game/components/player_jump.dart';
-import 'package:neural_break/game/components/player_slide.dart';
-import 'package:neural_break/game/components/obstacle.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/player_movement.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/player_jump.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/player_slide.dart';
+import 'package:neural_break/features/gameplay/domain/entities/obstacle.dart';
 import 'package:neural_break/widgets/avatars/pulse_runner_controller.dart';
 import 'package:flutter/foundation.dart'; // for kDebugMode print
 

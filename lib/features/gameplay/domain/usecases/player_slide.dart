@@ -5,7 +5,7 @@ import 'package:flame/components.dart';
 import 'package:neural_break/core/constants/game_constants.dart';
 
 // Imports jump logic to ensure sliding doesn't conflict with jumping
-import 'package:neural_break/game/components/player_jump.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/player_jump.dart';
 
 // Mixin for adding slide behavior to a Flame PositionComponent.
 // This allows any component to have slide logic by simply mixing this in.

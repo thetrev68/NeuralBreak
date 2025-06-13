@@ -86,27 +86,27 @@ lib/
     * **Move To:** `docs/project_structure.md` (create `docs` folder at project root).
     * **Action:** This is project documentation, not code.
 
-**Phase 3: Migrate Game Components & Logic (`lib/game`)**
+**Phase 3: Migrate Game Components & Logic (`lib/game`)***
 
 This is the most significant part. We'll primarily map your `lib/game` contents to `lib/features/gameplay/`.
 
-1.  **`lib/game/neural_break_game.dart`**:
+1.  **`lib/game/neural_break_game.dart`**:*
     * **Move To:** `lib/features/gameplay/presentation/pages/neural_break_game_page.dart` (or similar, if it's the main FlameGame widget)
     * **Action:** This is likely your main Flame game instance. It should be considered the "page" or primary widget for the gameplay feature.
 
-2.  **`lib/game/components/`**:
-    * **`player.dart`, `firewall.dart`, `obstacle.dart`, `obstacle_types`**:
+2.  **`lib/game/components/`**:*
+    * **`player.dart`, `firewall.dart`, `obstacle.dart`, `obstacle_types`**:*
         * **Move To (Domain Entities):** `lib/features/gameplay/domain/entities/player.dart`, `firewall.dart`, `obstacle.dart`, etc.
         * **Action:** These are the core "things" in your game world. They define the data and basic behavior of your game objects. They are the `entities`.
-    * **`player_jump.dart`, `player_movement.dart`, `player_slide.dart`**:
+    * **`player_jump.dart`, `player_movement.dart`, `player_slide.dart`**:*
         * **Move To (Domain Usecases/Components):** `lib/features/gameplay/domain/usecases/player_jump_usecase.dart`, `player_move_usecase.dart`, `player_slide_usecase.dart`. Or, if these are behaviors directly attached to the Flame `Player` component, keep them close to the Player component but within the `gameplay` feature.
         * **Action:** These are likely behaviors or actions the player can perform. In Clean Architecture, complex actions often become `usecases`. If they are simple mixins that modify a component's behavior, they can stay as part of the component definition or be moved to `features/gameplay/presentation/components` if they are Flame-specific `Component`s. For now, assume `usecases` or components.
-    * **`obstacle_spawner.dart`**:
+    * **`obstacle_spawner.dart`**:*
         * **Move To (Domain Usecases/Presentation Components):** `lib/features/gameplay/domain/usecases/spawn_obstacle_usecase.dart` and/or `lib/features/gameplay/presentation/components/obstacle_spawner_component.dart`.
         * **Action:** The *logic* of spawning (what, when, where) belongs in a usecase. The *actual Flame component* that executes this logic might remain as a component.
 
-3.  **`lib/game/managers/`**:
-    * **`game_controller.dart`, `game_state_manager.dart`**:
+3.  **`lib/game/managers/`**:*
+    * **`game_controller.dart`, `game_state_manager.dart`**:*
         * **Move To (Presentation Bloc/Controllers):** `lib/features/gameplay/presentation/bloc/game_bloc.dart` or `game_controller.dart`.
         * **Action:** These manage the overall state and flow of the game. They are prime candidates for your state management solution (BLoC, Riverpod, Provider).
     * **`component_manager.dart`, `input_manager.dart`, `life_manager.dart`, `obstacle_pool.dart`, `scene_manager.dart`, `score_manager.dart`, `ui_manager.dart`**:

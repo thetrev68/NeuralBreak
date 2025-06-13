@@ -3,12 +3,13 @@ import 'dart:math';
 
 // Flame base components
 import 'package:flame/components.dart';
+import 'package:flutter/foundation.dart';
 
 // Reference to main game class and necessary game elements
-import 'package:neural_break/game/neural_break_game.dart';
+import 'package:neural_break/features/gameplay/presentation/pages/neural_break_game.dart';
 import 'package:neural_break/core/constants/game_constants.dart';
 import 'package:neural_break/core/constants/game_states.dart';
-import 'package:neural_break/game/managers/obstacle_pool.dart';
+import 'package:neural_break/features/gameplay/data/datasources/obstacle_pool.dart';
 
 /// Spawns obstacles into the game world at regular intervals.
 /// Adjusts speed and timing dynamically to scale game difficulty.
@@ -83,8 +84,10 @@ class ObstacleSpawner extends Component with HasGameReference<NeuralBreakGame> {
         .removeFromParent(); // This stops and removes the old timer
     _initializeAndAddSpawnTimer(
         _currentSpawnInterval); // Create and add new timer
-    print(
-        'Difficulty increased. New spawn interval: $_currentSpawnInterval, obstacle speed: $_currentObstacleSpeed');
+    if (kDebugMode) {
+      debugPrint(
+          'Difficulty increased. New spawn interval: $_currentSpawnInterval, obstacle speed: $_currentObstacleSpeed');
+    }
   }
 
   void reset() {
@@ -95,7 +98,9 @@ class ObstacleSpawner extends Component with HasGameReference<NeuralBreakGame> {
     _spawnTimerComponent.removeFromParent(); // Stop and remove old timer
     _initializeAndAddSpawnTimer(
         _currentSpawnInterval); // Create and add new timer
-    print(
-        'Spawner reset. Spawn interval: $_currentSpawnInterval, obstacle speed: $_currentObstacleSpeed');
+    if (kDebugMode) {
+      debugPrint(
+          'Spawner reset. Spawn interval: $_currentSpawnInterval, obstacle speed: $_currentObstacleSpeed');
+    }
   }
 }

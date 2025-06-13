@@ -9,21 +9,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart'; // Added for kDebugMode
 
 // Game Managers
-import 'package:neural_break/game/managers/score_manager.dart';
-import 'package:neural_break/game/managers/life_manager.dart';
-import 'package:neural_break/game/managers/game_state_manager.dart';
-import 'package:neural_break/game/managers/ui_manager.dart';
-import 'package:neural_break/game/managers/game_controller.dart';
-import 'package:neural_break/game/managers/component_manager.dart';
-import 'package:neural_break/game/managers/input_manager.dart';
-import 'package:neural_break/game/managers/scene_manager.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/score_manager.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/life_manager.dart';
+import 'package:neural_break/features/gameplay/presentation/bloc/game_state_manager.dart';
+import 'package:neural_break/features/gameplay/presentation/components/ui_manager.dart';
+import 'package:neural_break/features/gameplay/presentation/bloc/game_controller.dart';
+import 'package:neural_break/features/gameplay/presentation/components/component_manager.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/input_manager.dart';
+import 'package:neural_break/features/gameplay/presentation/components/scene_manager.dart';
 
 // Game components
-import 'package:neural_break/game/components/player.dart';
-import 'package:neural_break/game/components/obstacle.dart';
-import 'package:neural_break/game/components/obstacle_spawner.dart';
+import 'package:neural_break/features/gameplay/domain/entities/player.dart';
+import 'package:neural_break/features/gameplay/domain/entities/obstacle.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/obstacle_spawner.dart';
 import 'package:neural_break/core/constants/game_constants.dart'; // Contains constants like initialLives, gameOverMessage, etc.
-import 'package:neural_break/game/managers/obstacle_pool.dart';
+import 'package:neural_break/features/gameplay/data/datasources/obstacle_pool.dart';
 
 /// Defines possible game states
 import 'package:neural_break/core/constants/game_states.dart';

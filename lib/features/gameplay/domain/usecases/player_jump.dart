@@ -5,7 +5,7 @@ import 'package:flame/components.dart';
 import 'package:neural_break/core/constants/game_constants.dart';
 
 // Used to check whether the player is currently sliding
-import 'package:neural_break/game/components/player_slide.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/player_slide.dart';
 
 // Mixin to add jump capability to a PositionComponent.
 // Requires the base class to include `HasGameReference<NeuralBreakGame>`.

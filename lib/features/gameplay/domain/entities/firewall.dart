@@ -4,7 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 // Base obstacle class that Firewall extends
-import 'package:neural_break/game/components/obstacle.dart';
+import 'package:neural_break/features/gameplay/domain/entities/obstacle.dart';
 
 /// A visual variant of the Obstacle component.
 /// Inherits all obstacle behavior, but uses a blue paint instead of red.
@@ -25,7 +25,8 @@ class Firewall extends Obstacle {
   /// Custom rendering logic: draws a blue rectangle over the default one
   @override
   void render(Canvas canvas) {
-    super.render(canvas); // Retain the obstacle’s default render logic (which may include debug elements)
+    super.render(
+        canvas); // Retain the obstacle’s default render logic (which may include debug elements)
     canvas.drawRect(size.toRect(), _firewallPaint); // Overlay a blue rectangle
   }
 }
