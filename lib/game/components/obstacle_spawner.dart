@@ -6,8 +6,8 @@ import 'package:flame/components.dart';
 
 // Reference to main game class and necessary game elements
 import 'package:neural_break/game/neural_break_game.dart';
-import 'package:neural_break/game/util/game_constants.dart';
-import 'package:neural_break/game/util/game_states.dart';
+import 'package:neural_break/core/constants/game_constants.dart';
+import 'package:neural_break/core/constants/game_states.dart';
 import 'package:neural_break/game/managers/obstacle_pool.dart';
 
 /// Spawns obstacles into the game world at regular intervals.

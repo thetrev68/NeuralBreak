@@ -2,7 +2,7 @@
 import 'package:flame/components.dart';
 
 // Game constants like gravity and jump force
-import 'package:neural_break/game/util/game_constants.dart';
+import 'package:neural_break/core/constants/game_constants.dart';
 
 // Used to check whether the player is currently sliding
 import 'package:neural_break/game/components/player_slide.dart';
@@ -48,8 +48,8 @@ mixin PlayerJump on PositionComponent {
   void updateJump(double dt) {
     if (!_isJumping) return;
 
-    _velocityY += gravity * dt;           // Apply gravity to velocity
-    position.y += _velocityY * dt;        // Move component vertically
+    _velocityY += gravity * dt; // Apply gravity to velocity
+    position.y += _velocityY * dt; // Move component vertically
 
     // If we've landed (or overshot), reset position and stop jumping
     if (position.y >= _groundY) {

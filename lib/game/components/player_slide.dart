@@ -2,7 +2,7 @@
 import 'package:flame/components.dart';
 
 // Game constants such as slide duration, player size while sliding
-import 'package:neural_break/game/util/game_constants.dart';
+import 'package:neural_break/core/constants/game_constants.dart';
 
 // Imports jump logic to ensure sliding doesn't conflict with jumping
 import 'package:neural_break/game/components/player_jump.dart';
@@ -32,13 +32,16 @@ mixin PlayerSlide on PositionComponent {
   // Player must be on the ground and not jumping to start a slide
   void slide() {
     final isJumping = this is PlayerJump && (this as PlayerJump).isJumping;
-    final groundY = this is PlayerJump ? (this as PlayerJump).groundY : position.y;
+    final groundY =
+        this is PlayerJump ? (this as PlayerJump).groundY : position.y;
 
     if (!_isSliding && !isJumping) {
       _isSliding = true;
       _slideTimer = slideDuration; // Set the countdown for how long to slide
       size.setValues(playerSlideWidth, playerSlideHeight); // Shrink the player
-      position.y = groundY + _originalPlayerSize.y - size.y; // Adjust position to keep on ground
+      position.y = groundY +
+          _originalPlayerSize.y -
+          size.y; // Adjust position to keep on ground
     }
   }
 
@@ -50,7 +53,8 @@ mixin PlayerSlide on PositionComponent {
       if (_slideTimer <= 0) {
         _isSliding = false;
         size.setFrom(_originalPlayerSize); // Restore original size
-        final groundY = this is PlayerJump ? (this as PlayerJump).groundY : position.y;
+        final groundY =
+            this is PlayerJump ? (this as PlayerJump).groundY : position.y;
         position.y = groundY; // Reset Y position back to ground level
       }
     }
@@ -63,7 +67,8 @@ mixin PlayerSlide on PositionComponent {
   void stopSlide() {
     if (_isSliding) {
       size.setFrom(_originalPlayerSize); // Revert to original size
-      final groundY = this is PlayerJump ? (this as PlayerJump).groundY : position.y;
+      final groundY =
+          this is PlayerJump ? (this as PlayerJump).groundY : position.y;
       position.y = groundY; // Reset vertical position
     }
     _isSliding = false;

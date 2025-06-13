@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/collisions.dart';
 import 'package:neural_break/game/neural_break_game.dart';
-import 'package:neural_break/game/util/game_constants.dart';
+import 'package:neural_break/core/constants/game_constants.dart';
 import 'package:neural_break/game/components/player_movement.dart';
 import 'package:neural_break/game/components/player_jump.dart';
 import 'package:neural_break/game/components/player_slide.dart';

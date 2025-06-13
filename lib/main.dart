@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart'; // Import for kDebugMode
 
 import 'package:neural_break/game/neural_break_game.dart';
 import 'package:neural_break/widgets/avatars/avatar_display_widget.dart';
-import 'package:neural_break/game/util/game_constants.dart';
+import 'package:neural_break/core/constants/game_constants.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

@@ -74,15 +74,15 @@ lib/
 
 **Phase 2: Migrate Core Utilities**
 
-1.  **`lib/game/util/game_constants.dart`**:
+1.  **`lib/game/util/game_constants.dart`**:*
     * **Move To:** `lib/core/constants/game_constants.dart`
     * **Action:** This file contains global constants like game speed, gravity, etc. These are typically `core` level.
 
-2.  **`lib/game/util/game_states.dart`**:
+2.  **`lib/game/util/game_states.dart`**:*
     * **Move To:** `lib/core/constants/game_states.dart` (if simple enums) or `lib/core/bloc/game_state_event.dart` (if part of a BLoC system).
     * **Action:** If these are just enums representing game states, `constants` is fine. If they are more complex state objects, they might belong closer to a state management solution in `core/` or `features/gameplay/presentation/bloc/`. For now, `constants` is a safe bet.
 
-3.  **`lib/game_structure.md`**:
+3.  **`lib/game_structure.md`**:*
     * **Move To:** `docs/project_structure.md` (create `docs` folder at project root).
     * **Action:** This is project documentation, not code.
 

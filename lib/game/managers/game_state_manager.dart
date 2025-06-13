@@ -1,4 +1,4 @@
-import 'package:neural_break/game/util/game_states.dart';
+import 'package:neural_break/core/constants/game_states.dart';
 
 class GameStateManager {
   GameState _state = GameState.playing;

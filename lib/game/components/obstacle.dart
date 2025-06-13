@@ -9,8 +9,8 @@ import 'package:flame/collisions.dart';
 
 // Game-specific dependencies
 import 'package:neural_break/game/neural_break_game.dart'; // Game reference
-import 'package:neural_break/game/util/game_constants.dart'; // Constants like score per obstacle
-import 'package:neural_break/game/util/game_states.dart'; // Game states
+import 'package:neural_break/core/constants/game_constants.dart'; // Constants like score per obstacle
+import 'package:neural_break/core/constants/game_states.dart'; // Game states
 
 // Represents a falling obstacle in the game.
 // Moves downward each frame, triggers scoring when off-screen,

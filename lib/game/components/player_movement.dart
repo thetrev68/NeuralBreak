@@ -2,7 +2,7 @@
 import 'package:flame/components.dart';
 
 // Game constants like lane positions and movement speed
-import 'package:neural_break/game/util/game_constants.dart';
+import 'package:neural_break/core/constants/game_constants.dart';
 
 // Access to the main game class for gameRef usage
 import 'package:neural_break/game/neural_break_game.dart';

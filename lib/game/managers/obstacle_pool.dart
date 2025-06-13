@@ -7,7 +7,7 @@ import 'package:flame/components.dart';
 // Import your obstacle and firewall definitions
 import 'package:neural_break/game/components/obstacle.dart';
 import 'package:neural_break/game/components/firewall.dart'; // Assuming Firewall is the type you primarily pool
-import 'package:neural_break/game/util/game_constants.dart';
+import 'package:neural_break/core/constants/game_constants.dart';
 
 /// Object pool for obstacles to reduce garbage collection overhead
 class ObstaclePool {

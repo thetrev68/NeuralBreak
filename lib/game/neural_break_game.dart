@@ -22,11 +22,11 @@ import 'package:neural_break/game/managers/scene_manager.dart';
 import 'package:neural_break/game/components/player.dart';
 import 'package:neural_break/game/components/obstacle.dart';
 import 'package:neural_break/game/components/obstacle_spawner.dart';
-import 'package:neural_break/game/util/game_constants.dart'; // Contains constants like initialLives, gameOverMessage, etc.
+import 'package:neural_break/core/constants/game_constants.dart'; // Contains constants like initialLives, gameOverMessage, etc.
 import 'package:neural_break/game/managers/obstacle_pool.dart';
 
 /// Defines possible game states
-import 'package:neural_break/game/util/game_states.dart';
+import 'package:neural_break/core/constants/game_states.dart';
 
 // The main game class. Manages all gameplay logic and components.
 class NeuralBreakGame extends FlameGame
