@@ -9,6 +9,7 @@ import 'package:neural_break/features/gameplay/domain/usecases/player_slide.dart
 import 'package:neural_break/features/gameplay/domain/entities/obstacle.dart';
 import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_controller.dart';
 import 'package:flutter/foundation.dart'; // for kDebugMode print
+import 'package:neural_break/features/gameplay/engine/game_logic_helpers.dart';
 
 class Player extends PositionComponent
     with
@@ -73,7 +74,7 @@ class Player extends PositionComponent
       Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
     if (other is Obstacle) {
-      game.loseLife();
+      loseLife(game);
     }
   }
 

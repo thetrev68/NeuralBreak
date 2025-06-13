@@ -6,6 +6,7 @@ import 'package:flame/events.dart';
 import 'package:neural_break/core/constants/game_states.dart';
 import '../engine/neural_break_game.dart';
 import 'package:neural_break/core/constants/game_constants.dart';
+import 'package:neural_break/features/gameplay/engine/game_logic_helpers.dart';
 
 KeyEventResult forwardKeyEventToInputManager(
   NeuralBreakGame game,
@@ -27,7 +28,7 @@ void forwardTapEventToGame(NeuralBreakGame game, TapDownEvent event) {
     if (game.contains(game.gameOverText)) {
       game.remove(game.gameOverText);
     }
-    game.restartGame();
+    restartGame(game);
   }
 
   // If game is paused for level up, tap to continue
@@ -35,7 +36,7 @@ void forwardTapEventToGame(NeuralBreakGame game, TapDownEvent event) {
     if (game.contains(game.levelUpMessageText)) {
       game.remove(game.levelUpMessageText);
     }
-    game.continueGameAfterLevelUp();
+    continueGameAfterLevelUp(game);
   }
 
   // Handle in-game tap logic only when playing

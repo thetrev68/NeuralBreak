@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart'; // Added for kDebugMode
 import 'package:neural_break/features/gameplay/engine/game_initialization.dart';
 import 'package:neural_break/features/gameplay/engine/text_ui_initializer.dart';
+import 'package:neural_break/features/gameplay/engine/game_logic_helpers.dart';
 
 // Game Managers
 import 'package:neural_break/features/gameplay/domain/usecases/score_manager.dart';
@@ -22,9 +23,8 @@ import 'package:neural_break/features/gameplay/presentation/components/scene_man
 
 // Game components
 import 'package:neural_break/features/gameplay/domain/entities/player.dart';
-import 'package:neural_break/features/gameplay/domain/entities/obstacle.dart';
 import 'package:neural_break/features/gameplay/domain/usecases/obstacle_spawner.dart';
-import 'package:neural_break/core/constants/game_constants.dart'; // Contains constants like initialLives, gameOverMessage, etc.
+// Contains constants like initialLives, gameOverMessage, etc.
 import 'package:neural_break/features/gameplay/data/datasources/obstacle_pool.dart';
 import 'package:neural_break/features/gameplay/engine/input_router.dart';
 
@@ -56,7 +56,7 @@ class NeuralBreakGame extends FlameGame
   late final TextComponent gameOverText; // Declared here
 
   // --- Game State Variables ---
-  int _currentLevelScoreTarget = 0;
+  int currentLevelScoreTarget = 0;
   // Flag to ensure level up effects are applied only once per pause
   bool _levelUpEffectsAppliedForCurrentPause = false;
 
@@ -81,7 +81,7 @@ class NeuralBreakGame extends FlameGame
       // Initialize all UI text components (score, lives, level, overlays)
       await initializeUITextComponents(this);
 
-      restartGame();
+      restartGame(this);
 
       if (kDebugMode) {
         print('NeuralBreakGame: _restartGame called (STEP 18)');
@@ -108,7 +108,8 @@ class NeuralBreakGame extends FlameGame
     // Check for level up pause state and trigger effects once
     if (gameStateManager.currentGameState == GameState.levelUpPaused) {
       if (!_levelUpEffectsAppliedForCurrentPause) {
-        _levelUp(); // Trigger the level up effects (component manipulation, UI update)
+        levelUp(
+            this); // Trigger the level up effects (component manipulation, UI update)
         _levelUpEffectsAppliedForCurrentPause =
             true; // Set flag to prevent repeated calls
       }
@@ -155,97 +156,4 @@ class NeuralBreakGame extends FlameGame
   }
 
   // ───── Game Logic Helpers ─────
-
-  void loseLife() {
-    if (gameStateManager.currentGameState == GameState.playing) {
-      // Use gameStateManager
-      lifeManager
-          .loseLife(); // Assuming LifeManager has a method called loseLife()
-      uiManager.updateTexts(); // Update UI after life change
-
-      if (lifeManager.lives <= 0) {
-        onGameOver(); // Use onGameOver()
-      } else {
-        _resetForNewLife();
-      }
-    }
-  }
-
-  // You might need methods like `onGameOver()` that delegate to gameController,
-  // and manage the _gameOverText here:
-  void onGameOver() {
-    // This is triggered by gameController.onPlayerHit if lives run out
-    gameStateManager.setGameOver(); // Ensure state is set
-    add(gameOverText); // Add the game over message
-    // Potentially stop all game components here if not handled elsewhere
-    player.stopAllActions();
-    obstacleSpawner.stopSpawning();
-    children.whereType<Obstacle>().forEach((o) => o.removeFromParent());
-  }
-
-  void _resetForNewLife() {
-    gameStateManager.setPlaying(); // Use gameStateManager to set state
-    player.reset();
-    obstacleSpawner.reset();
-    obstaclePool.clear(); // Add here
-    obstacleSpawner.startSpawning();
-    children.whereType<Obstacle>().forEach((o) => o.removeFromParent());
-  }
-
-  void increaseScore(int amount) {
-    scoreManager
-        .incrementScore(amount); // This will handle updating scoreManager.score
-    uiManager.updateTexts(); // Call the updateTexts method properly
-
-    if (scoreManager.score >= _currentLevelScoreTarget) {
-      _levelUp();
-    }
-  }
-
-  void _levelUp() {
-    // This method now only applies the effects after GameController has set the state.
-    // The state change to levelUpPaused happens in update() and triggers this method.
-    obstacleSpawner.increaseDifficulty(scoreManager.level);
-
-    add(levelUpMessageText); // Add the level up message component to the game tree
-
-    player.stopAllActions();
-    obstacleSpawner.stopSpawning();
-    children.whereType<Obstacle>().forEach((o) => o.removeFromParent());
-  }
-
-  void continueGameAfterLevelUp() {
-    levelUpMessageText
-        .removeFromParent(); // Remove the message from the game tree
-    gameStateManager
-        .setPlaying(); // Manually set state to playing after level up for now
-    // gameController.continueGameAfterLevelUp(); // Delegate state change to controller (if gameController manages state transition)
-
-    player.reset(); // Reset player position/state
-    obstacleSpawner.startSpawning(); // Restart spawning
-  }
-
-  void restartGame() {
-    gameController.restartGame(); // Delegates core reset logic to controller
-    // Ensure componentManager's resetComponents can actually reset player and obstacles
-    componentManager.resetComponents(
-        player: player,
-        activeObstacles: children.whereType<Obstacle>().toList());
-    _calculateCurrentLevelScoreTarget(); // Recalculate target for new game
-    uiManager.updateTexts(); // Update UI after restart
-  }
-
-  void _calculateCurrentLevelScoreTarget() {
-    // Delegates calculation to ScoreManager
-    _currentLevelScoreTarget = scoreManager.calculateLevelScoreTarget(
-      initialSpawnInterval: initialSpawnInterval,
-      spawnIntervalDecreasePerLevel: spawnIntervalDecreasePerLevel,
-      minSpawnInterval: minSpawnInterval,
-      levelDuration: levelDuration,
-      scorePerObstacle: scorePerObstacle,
-    );
-  }
-
-  // REMOVED: _updateScoreText, _updateLivesText, _updateLevelText
-  // These are now handled by uiManager.updateTexts()
 }

@@ -11,6 +11,7 @@ import 'package:flame/collisions.dart';
 import 'package:neural_break/features/gameplay/engine/neural_break_game.dart'; // Game reference
 import 'package:neural_break/core/constants/game_constants.dart'; // Constants like score per obstacle
 import 'package:neural_break/core/constants/game_states.dart'; // Game states
+import 'package:neural_break/features/gameplay/engine/game_logic_helpers.dart';
 
 // Represents a falling obstacle in the game.
 // Moves downward each frame, triggers scoring when off-screen,
@@ -80,7 +81,7 @@ class Obstacle extends PositionComponent
     if (position.y - size.y / 2 > game.size.y) {
       // Increase score if game is still in the playing state when obstacle leaves screen
       // This prevents scoring during game over or paused states.
-      game.increaseScore(scorePerObstacle);
+      increaseScore(this as NeuralBreakGame, scorePerObstacle);
 
       print(
         'Obstacle: $hashCode Removed off-screen. '
