@@ -1,3 +1,5 @@
+// file: lib/features/gameplay/presentation/widgets/avatars/pulse_runner_controller.dart
+
 import 'package:flutter/material.dart';
 
 class PulseRunnerSlide extends StatelessWidget {

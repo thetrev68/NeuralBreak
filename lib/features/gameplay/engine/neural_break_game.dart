@@ -1,35 +1,34 @@
 // lib/game/neural_break_game.dart
+
 // Core Flame & Flutter dependencies
 import 'dart:async';
-import 'package:flame/game.dart';
-import 'package:flame/events.dart';
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart'; // Added for kDebugMode
-import 'package:neural_break/features/gameplay/engine/game_initialization.dart';
-import 'package:neural_break/features/gameplay/engine/text_ui_initializer.dart';
-import 'package:neural_break/features/gameplay/engine/game_logic_helpers.dart';
 
-// Game Managers
-import 'package:neural_break/features/gameplay/domain/usecases/score_manager.dart';
-import 'package:neural_break/features/gameplay/domain/usecases/life_manager.dart';
-import 'package:neural_break/features/gameplay/presentation/bloc/game_state_manager.dart';
-import 'package:neural_break/features/gameplay/presentation/components/ui_manager.dart';
-import 'package:neural_break/features/gameplay/presentation/bloc/game_controller.dart';
-import 'package:neural_break/features/gameplay/presentation/components/component_manager.dart';
-import 'package:neural_break/features/gameplay/domain/usecases/input_manager.dart';
-import 'package:neural_break/features/gameplay/presentation/components/scene_manager.dart';
+// Package Imports (if any external packages)
+// import 'package:some_package/some_package.dart';
 
-// Game components
-import 'package:neural_break/features/gameplay/domain/entities/player.dart';
-import 'package:neural_break/features/gameplay/domain/usecases/obstacle_spawner.dart';
-// Contains constants like initialLives, gameOverMessage, etc.
-import 'package:neural_break/features/gameplay/data/datasources/obstacle_pool.dart';
-import 'package:neural_break/features/gameplay/engine/input_router.dart';
-
-/// Defines possible game states
+// Project Imports
 import 'package:neural_break/core/constants/game_states.dart';
+import 'package:neural_break/features/gameplay/data/datasources/obstacle_pool.dart';
+import 'package:neural_break/features/gameplay/domain/entities/player.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/input_manager.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/life_manager.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/obstacle_spawner.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/score_manager.dart';
+import 'package:neural_break/features/gameplay/engine/game_initialization.dart';
+import 'package:neural_break/features/gameplay/engine/game_logic_helpers.dart';
+import 'package:neural_break/features/gameplay/engine/input_router.dart';
+import 'package:neural_break/features/gameplay/engine/text_ui_initializer.dart';
+import 'package:neural_break/features/gameplay/presentation/bloc/game_controller.dart';
+import 'package:neural_break/features/gameplay/presentation/bloc/game_state_manager.dart';
+import 'package:neural_break/features/gameplay/presentation/components/component_manager.dart';
+import 'package:neural_break/features/gameplay/presentation/components/scene_manager.dart';
+import 'package:neural_break/features/gameplay/presentation/components/ui_manager.dart';
 
 // The main game class. Manages all gameplay logic and components.
 class NeuralBreakGame extends FlameGame
@@ -39,53 +38,73 @@ class NeuralBreakGame extends FlameGame
   NeuralBreakGame({required this.tickerProvider});
 
   // --- Game Managers ---
-  late final ScoreManager scoreManager;
-  late final LifeManager lifeManager;
-  late final GameStateManager gameStateManager;
-  late final UIManager uiManager;
-  late final GameController gameController;
   late final ComponentManager componentManager;
+  late final GameController gameController;
+  late final GameStateManager gameStateManager;
   late final InputManager inputManager;
-  late final SceneManager sceneManager;
-  late final ObstacleSpawner obstacleSpawner;
+  late final LifeManager lifeManager;
   late final ObstaclePool obstaclePool;
+  late final ObstacleSpawner obstacleSpawner;
+  late final SceneManager sceneManager;
+  late final ScoreManager scoreManager;
+  late final UIManager uiManager;
 
   // --- Game Components that are *fields* of the game (can be added/removed directly) ---
+  late final TextComponent gameOverText;
+  late final TextComponent levelUpMessageText;
   late final Player player;
-  late final TextComponent levelUpMessageText; // Declared here
-  late final TextComponent gameOverText; // Declared here
 
   // --- Game State Variables ---
   int currentLevelScoreTarget = 0;
+
   // Flag to ensure level up effects are applied only once per pause
   bool _levelUpEffectsAppliedForCurrentPause = false;
-
-  // The 'loaded' Future is managed internally by FlameGame now that GameWidget is used.
-  // late final Future<void> loadComplete; // No longer manually exposed or needed this way
 
   @override
   Future<void> onLoad() async {
     if (kDebugMode) {
-      print('NeuralBreakGame: onLoad started (STEP 3: Inside onLoad)');
+      print('NeuralBreakGame.onLoad(): --- STEP 1: Method entered.');
     }
 
     await super.onLoad();
     if (kDebugMode) {
-      print('NeuralBreakGame: super.onLoad completed (STEP 4)');
+      print('NeuralBreakGame.onLoad(): --- STEP 2: super.onLoad() completed.');
     }
 
     try {
-      // Initialize core systems (managers + player + controller + spawner + components)
+      if (kDebugMode) {
+        print(
+            'NeuralBreakGame.onLoad(): --- STEP 3: Calling initializeGameSystems...');
+      }
       await initializeGameSystems(this);
-
-      // Initialize all UI text components (score, lives, level, overlays)
-      await initializeUITextComponents(this);
-
-      restartGame(this);
+      if (kDebugMode) {
+        print(
+            'NeuralBreakGame.onLoad(): --- STEP 4: initializeGameSystems completed.');
+      }
 
       if (kDebugMode) {
-        print('NeuralBreakGame: _restartGame called (STEP 18)');
-        print('NeuralBreakGame: onLoad completed successfully! (STEP 19)');
+        print(
+            'NeuralBreakGame.onLoad(): --- STEP 5: Calling initializeUITextComponents...');
+      }
+      await initializeUITextComponents(this);
+      if (kDebugMode) {
+        print(
+            'NeuralBreakGame.onLoad(): --- STEP 6: initializeUITextComponents completed.');
+      }
+
+      if (kDebugMode) {
+        print('NeuralBreakGame.onLoad(): --- STEP 7: Calling restartGame...');
+      }
+      // This function is assumed synchronous. If it contains async calls that *need* awaiting,
+      // it should be made async and awaited here.
+      restartGame(this);
+      if (kDebugMode) {
+        print('NeuralBreakGame.onLoad(): --- STEP 8: restartGame completed.');
+      }
+
+      if (kDebugMode) {
+        print(
+            'NeuralBreakGame.onLoad(): --- STEP 9: ALL onLoad TASKS COMPLETE.');
       }
     } catch (e, s) {
       if (kDebugMode) {
@@ -101,33 +120,24 @@ class NeuralBreakGame extends FlameGame
 
   @override
   void update(double dt) {
-    super.update(dt); // IMPORTANT: Always call super.update(dt) first
+    super.update(dt);
 
-    // ... (rest of your update method)
-    // --- NEW LEVEL UP LOGIC START ---
-    // Check for level up pause state and trigger effects once
     if (gameStateManager.currentGameState == GameState.levelUpPaused) {
       if (!_levelUpEffectsAppliedForCurrentPause) {
-        levelUp(
-            this); // Trigger the level up effects (component manipulation, UI update)
-        _levelUpEffectsAppliedForCurrentPause =
-            true; // Set flag to prevent repeated calls
+        levelUp(this); // Trigger the level up effects
+        _levelUpEffectsAppliedForCurrentPause = true;
       }
       return; // Stop further game logic updates while paused for level up
-    } else {
-      // Reset the flag when the game is not in level up paused state
+    }
+
+    // Reset the flag if not in levelUpPaused state.
+    if (_levelUpEffectsAppliedForCurrentPause &&
+        gameStateManager.currentGameState != GameState.levelUpPaused) {
       _levelUpEffectsAppliedForCurrentPause = false;
     }
-    // --- NEW LEVEL UP LOGIC END ---
 
-    // Game logic for when the game is playing
     if (gameStateManager.currentGameState == GameState.playing) {
-      // Update UI texts (score, lives, level) continuously while playing
-      uiManager.updateTexts(); // Call the updateTexts method
-      // You can add other continuous playing-state logic here
-      // For instance, if player movement needs to be continuously applied based on input,
-      // it might be done here or delegated to GameController.
-      // gameController.updatePlayingState(dt, player); // If you move update logic to gameController
+      uiManager.updateTexts();
     }
   }
 
@@ -154,6 +164,4 @@ class NeuralBreakGame extends FlameGame
       print('NeuralBreakGame: onRemove called. Game is being removed.');
     }
   }
-
-  // ───── Game Logic Helpers ─────
 }

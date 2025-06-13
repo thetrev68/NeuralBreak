@@ -1,8 +1,9 @@
-// lib/game/managers/component_manager.dart
+// file: lib/features/gameplay/presentation/components/component_manager.dart
+
+import 'package:neural_break/features/gameplay/data/datasources/obstacle_pool.dart'; // Project imports
+import 'package:neural_break/features/gameplay/domain/entities/obstacle.dart';
 import 'package:neural_break/features/gameplay/domain/entities/player.dart';
-import 'package:neural_break/features/gameplay/domain/entities/obstacle.dart'; // Make sure Obstacle is imported
-import 'package:neural_break/features/gameplay/domain/usecases/obstacle_spawner.dart'; // Make sure ObstacleSpawner is imported
-import 'package:neural_break/features/gameplay/data/datasources/obstacle_pool.dart'; // Make sure ObstaclePool is imported
+import 'package:neural_break/features/gameplay/domain/usecases/obstacle_spawner.dart';
 
 class ComponentManager {
   // The constructor no longer requires specific components.

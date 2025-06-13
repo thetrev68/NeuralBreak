@@ -1,10 +1,10 @@
-// Flame base components
+// file: lib/features/gameplay/domain/usecases/player_jump.dart
+
+// Flame package imports
 import 'package:flame/components.dart';
 
-// Game constants like gravity and jump force
+// Project imports
 import 'package:neural_break/core/constants/game_constants.dart';
-
-// Used to check whether the player is currently sliding
 import 'package:neural_break/features/gameplay/domain/usecases/player_slide.dart';
 
 // Mixin to add jump capability to a PositionComponent.

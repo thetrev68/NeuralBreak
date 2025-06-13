@@ -1,17 +1,17 @@
-// Suppresses print warnings (often discouraged in production code)
-// Used here for simple debug output
-// ignore_for_file: avoid_print
+// file: lib/features/gameplay/domain/entities/obstacle.dart
 
-// Flame base and utility classes
-import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
+// Flame and Flutter packages
 import 'package:flame/collisions.dart';
+import 'package:flame/components.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
-// Game-specific dependencies
-import 'package:neural_break/features/gameplay/engine/neural_break_game.dart'; // Game reference
-import 'package:neural_break/core/constants/game_constants.dart'; // Constants like score per obstacle
-import 'package:neural_break/core/constants/game_states.dart'; // Game states
+// Project imports
+import 'package:neural_break/core/constants/game_constants.dart';
+import 'package:neural_break/core/constants/game_states.dart';
+import 'package:neural_break/features/gameplay/data/datasources/obstacle_pool.dart';
 import 'package:neural_break/features/gameplay/engine/game_logic_helpers.dart';
+import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
 
 // Represents a falling obstacle in the game.
 // Moves downward each frame, triggers scoring when off-screen,
@@ -47,10 +47,12 @@ class Obstacle extends PositionComponent
   Future<void> onLoad() async {
     await super.onLoad();
     add(RectangleHitbox()); // Adds collision detection box
-    print(
-      'Obstacle: onLoad completed. Position: '
-      '${position.x.toStringAsFixed(2)}, ${position.y.toStringAsFixed(2)}',
-    );
+    if (kDebugMode) {
+      print(
+        'Obstacle: onLoad completed. Position: '
+        '${position.x.toStringAsFixed(2)}, ${position.y.toStringAsFixed(2)}',
+      );
+    }
   }
 
   // Called every frame to update position and check bounds
@@ -69,11 +71,13 @@ class Obstacle extends PositionComponent
 
     // Print debug output only for the first few updates
     if (_updateCount < 5) {
-      print(
-        'Obstacle: $hashCode Update ${_updateCount++}, '
-        'Y: ${position.y.toStringAsFixed(2)}, '
-        'Speed: ${speed.toStringAsFixed(2)}', // Using 'speed' property
-      );
+      if (kDebugMode) {
+        print(
+          'Obstacle: $hashCode Update ${_updateCount++}, '
+          'Y: ${position.y.toStringAsFixed(2)}, '
+          'Speed: ${speed.toStringAsFixed(2)}', // Using 'speed' property
+        );
+      }
     }
 
     // If the obstacle goes off the bottom of the screen
@@ -81,12 +85,14 @@ class Obstacle extends PositionComponent
     if (position.y - size.y / 2 > game.size.y) {
       // Increase score if game is still in the playing state when obstacle leaves screen
       // This prevents scoring during game over or paused states.
-      increaseScore(this as NeuralBreakGame, scorePerObstacle);
+      increaseScore(game, scorePerObstacle);
 
-      print(
-        'Obstacle: $hashCode Removed off-screen. '
-        'Score increased to: ${game.scoreManager.score}',
-      );
+      if (kDebugMode) {
+        print(
+          'Obstacle: $hashCode Removed off-screen. '
+          'Score increased to: ${game.scoreManager.score}',
+        );
+      }
 
       removeFromParent(); // Remove this obstacle from the game
     }

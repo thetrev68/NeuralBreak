@@ -1,10 +1,15 @@
 // File: lib/features/gameplay/engine/text_ui_initializer.dart
 
-import 'package:flutter/material.dart';
+// Flame and Flutter packages
 import 'package:flame/components.dart';
-import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
-import 'package:neural_break/core/constants/game_constants.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+// Project imports
+import 'package:neural_break/core/constants/game_constants.dart';
+
+// Relative imports
+import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
 
 Future<void> initializeUITextComponents(NeuralBreakGame game) async {
   // Score, Lives, Level

@@ -1,4 +1,5 @@
-// lib/game/managers/life_manager.dart
+// file: lib/features/gameplay/domain/usecases/life_manager.dart
+
 import 'package:flutter/foundation.dart'; // Import for ValueNotifier
 
 class LifeManager {

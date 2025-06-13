@@ -1,4 +1,9 @@
+// file: lib/features/gameplay/presentation/widgets/avatars/avatar_display_widget.dart
+
+// Flutter package imports
 import 'package:flutter/material.dart';
+
+// Project imports
 import 'package:neural_break/features/gameplay/presentation/components/ui_manager.dart';
 
 class AvatarDisplayWidget extends StatefulWidget {

@@ -1,4 +1,4 @@
-// lib/game/managers/obstacle_pool.dart
+// file: lib/features/gameplay/data/datasources/obstacle_pool.dart
 
 // Required for managing reusable components efficiently
 import 'dart:collection';

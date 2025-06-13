@@ -1,15 +1,17 @@
+// file: lib/features/gameplay/domain/usecases/obstacle_spawner.dart
+
 // Dart standard random number generator
 import 'dart:math';
 
-// Flame base components
+// Flame and Flutter packages
 import 'package:flame/components.dart';
 import 'package:flutter/foundation.dart';
 
-// Reference to main game class and necessary game elements
-import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
+// Project imports
 import 'package:neural_break/core/constants/game_constants.dart';
 import 'package:neural_break/core/constants/game_states.dart';
 import 'package:neural_break/features/gameplay/data/datasources/obstacle_pool.dart';
+import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
 
 /// Spawns obstacles into the game world at regular intervals.
 /// Adjusts speed and timing dynamically to scale game difficulty.

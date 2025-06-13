@@ -1,15 +1,20 @@
-import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
+// file: lib/features/gameplay/domain/entities/player.dart
+
+// Flame and Flutter packages
 import 'package:flame/collisions.dart';
-import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
+import 'package:flame/components.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+// Project imports
 import 'package:neural_break/core/constants/game_constants.dart';
-import 'package:neural_break/features/gameplay/domain/usecases/player_movement.dart';
-import 'package:neural_break/features/gameplay/domain/usecases/player_jump.dart';
-import 'package:neural_break/features/gameplay/domain/usecases/player_slide.dart';
 import 'package:neural_break/features/gameplay/domain/entities/obstacle.dart';
-import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_controller.dart';
-import 'package:flutter/foundation.dart'; // for kDebugMode print
+import 'package:neural_break/features/gameplay/domain/usecases/player_jump.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/player_movement.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/player_slide.dart';
 import 'package:neural_break/features/gameplay/engine/game_logic_helpers.dart';
+import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
+import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_controller.dart';
 
 class Player extends PositionComponent
     with

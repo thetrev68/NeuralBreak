@@ -1,9 +1,10 @@
 // File: lib/features/gameplay/engine/game_logic_helpers.dart
 
-import 'package:neural_break/features/gameplay/domain/entities/obstacle.dart';
-import '../engine/neural_break_game.dart';
 import 'package:neural_break/core/constants/game_constants.dart';
 import 'package:neural_break/core/constants/game_states.dart';
+import 'package:neural_break/features/gameplay/domain/entities/obstacle.dart';
+
+import '../engine/neural_break_game.dart';
 
 void loseLife(NeuralBreakGame game) {
   if (game.gameStateManager.currentGameState == GameState.playing) {

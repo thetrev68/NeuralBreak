@@ -1,6 +1,10 @@
-// lib/game/managers/input_manager.dart
-import 'package:flutter/services.dart'; // This import provides KeyEventResult
-import 'package:flutter/widgets.dart'; // Add this line
+// file: lib/features/gameplay/domain/usecases/input_manager.dart
+
+// Flutter package imports
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+// Project imports
 import 'package:neural_break/features/gameplay/domain/entities/player.dart';
 
 class InputManager {

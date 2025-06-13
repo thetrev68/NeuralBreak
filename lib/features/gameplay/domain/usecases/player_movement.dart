@@ -1,10 +1,10 @@
-// Flame component base class
+// file: lib/features/gameplay/domain/usecases/player_movement.dart
+
+// Flame package imports
 import 'package:flame/components.dart';
 
-// Game constants like lane positions and movement speed
+// Project imports
 import 'package:neural_break/core/constants/game_constants.dart';
-
-// Access to the main game class for gameRef usage
 import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
 
 // Adds horizontal lane-based movement to the component.

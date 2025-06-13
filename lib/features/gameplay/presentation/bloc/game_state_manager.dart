@@ -1,3 +1,5 @@
+// file: lib/features/gameplay/presentation/bloc/game_state_manager.dart
+
 import 'package:neural_break/core/constants/game_states.dart';
 
 class GameStateManager {

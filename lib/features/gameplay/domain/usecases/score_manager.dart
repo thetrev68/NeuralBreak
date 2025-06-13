@@ -1,4 +1,5 @@
-// lib/game/managers/score_manager.dart
+// file: lib/features/gameplay/domain/usecases/score_manager.dart
+
 import 'package:flutter/foundation.dart'; // Import for ValueNotifier
 
 class ScoreManager {

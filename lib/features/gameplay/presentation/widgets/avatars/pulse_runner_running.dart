@@ -1,3 +1,5 @@
+// file: lib/features/gameplay/presentation/widgets/avatars/pulse_runner_running.dart
+
 import 'package:flutter/material.dart';
 
 class PulseRunnerRunning extends StatefulWidget {

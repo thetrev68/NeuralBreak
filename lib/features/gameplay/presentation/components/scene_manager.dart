@@ -1,3 +1,5 @@
+// file: lib/features/gameplay/presentation/components/scene_manager.dart
+
 enum Scene { mainMenu, gameplay, paused, gameOver }
 
 class SceneManager {

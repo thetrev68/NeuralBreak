@@ -1,5 +1,10 @@
-import 'package:flutter/material.dart';
+// file: lib/features/gameplay/presentation/pages/game_screen.dart
+
+// Flame and Flutter packages
 import 'package:flame/game.dart';
+import 'package:flutter/material.dart';
+
+// Project imports
 import 'package:neural_break/features/gameplay/engine/neural_break_game.dart';
 import 'package:neural_break/features/gameplay/presentation/components/ui_manager.dart';
 import 'package:neural_break/features/gameplay/presentation/widgets/avatars/avatar_display_widget.dart';

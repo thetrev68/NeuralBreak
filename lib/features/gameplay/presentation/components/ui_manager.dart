@@ -1,13 +1,16 @@
+// file: lib/features/gameplay/presentation/components/ui_manager.dart
+
+// Flame and Flutter packages
 import 'package:flame/components.dart';
 import 'package:flutter/widgets.dart';
 
-import 'package:neural_break/features/gameplay/domain/usecases/score_manager.dart';
-import 'package:neural_break/features/gameplay/domain/usecases/life_manager.dart';
+// Project imports
 import 'package:neural_break/features/gameplay/domain/entities/player.dart';
-
+import 'package:neural_break/features/gameplay/domain/usecases/life_manager.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/score_manager.dart';
 import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_controller.dart';
-import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_running.dart';
 import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_jump.dart';
+import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_running.dart';
 import 'package:neural_break/features/gameplay/presentation/widgets/avatars/pulse_runner_slide.dart';
 
 class UIManager {

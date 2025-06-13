@@ -1,9 +1,11 @@
-// lib/game/managers/game_controller.dart
-import '../../domain/usecases/score_manager.dart';
-import '../../domain/usecases/life_manager.dart';
-import '../bloc/game_state_manager.dart';
-import '../components/ui_manager.dart';
-import '../../domain/usecases/input_manager.dart'; // <-- New: Import InputManager
+// File: lib/features/gameplay/presentation/bloc/game_controller.dart
+
+// Project imports
+import 'package:neural_break/features/gameplay/domain/usecases/input_manager.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/life_manager.dart';
+import 'package:neural_break/features/gameplay/domain/usecases/score_manager.dart';
+import 'package:neural_break/features/gameplay/presentation/bloc/game_state_manager.dart';
+import 'package:neural_break/features/gameplay/presentation/components/ui_manager.dart';
 
 class GameController {
   final ScoreManager scoreManager;

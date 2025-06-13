@@ -1,12 +1,17 @@
 // File: lib/features/gameplay/engine/input_router.dart
 
+// Flame and Flutter packages
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flame/events.dart';
-import 'package:neural_break/core/constants/game_states.dart';
-import '../engine/neural_break_game.dart';
+
+// Project imports
 import 'package:neural_break/core/constants/game_constants.dart';
+import 'package:neural_break/core/constants/game_states.dart';
 import 'package:neural_break/features/gameplay/engine/game_logic_helpers.dart';
+
+// Relative imports
+import '../engine/neural_break_game.dart';
 
 KeyEventResult forwardKeyEventToInputManager(
   NeuralBreakGame game,

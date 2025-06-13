@@ -46,6 +46,12 @@
 │   │   │   │       ├── player_slide.dart
 │   │   │   │       └── score_manager.dart
 │   │   │   ├── engine
+│   │   │   │   ├── game_initialization.dart
+│   │   │   │   ├── game_logic_helpers.dart
+│   │   │   │   ├── input_router.dart
+│   │   │   │   ├── neural_break_game.dart
+│   │   │   │   ├── overlay_router.dart
+│   │   │   │   └── text_ui_initializer.dart
 │   │   │   └── presentation
 │   │   │       ├── bloc
 │   │   │       │   ├── game_controller.dart
@@ -55,8 +61,7 @@
 │   │   │       │   ├── scene_manager.dart
 │   │   │       │   └── ui_manager.dart
 │   │   │       ├── pages
-│   │   │       │   ├── game_screen.dart
-│   │   │       │   └── neural_break_game.dart
+│   │   │       │   └── game_screen.dart
 │   │   │       └── widgets
 │   │   │           └── avatars
 │   │   │               ├── avatar_display_widget.dart

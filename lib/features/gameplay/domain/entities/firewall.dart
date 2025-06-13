@@ -1,9 +1,10 @@
-// lib/game/components/firewall.dart
-// Core Flame and Flutter imports
+// file: lib/features/gameplay/domain/entities/firewall.dart
+
+// Flame and Flutter imports
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
-// Base obstacle class that Firewall extends
+// Project imports
 import 'package:neural_break/features/gameplay/domain/entities/obstacle.dart';
 
 /// A visual variant of the Obstacle component.
