@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart'; // Added for kDebugMode
 import 'package:neural_break/features/gameplay/engine/game_initialization.dart';
+import 'package:neural_break/features/gameplay/engine/text_ui_initializer.dart';
 
 // Game Managers
 import 'package:neural_break/features/gameplay/domain/usecases/score_manager.dart';
@@ -77,89 +78,8 @@ class NeuralBreakGame extends FlameGame
       // Initialize core systems (managers + player + controller + spawner + components)
       await initializeGameSystems(this);
 
-      // Initialize UI Text Components
-      final scoreTextComponent = TextComponent(
-        text: 'Score: ${scoreManager.score}',
-        position: Vector2(size.x / 2, 20),
-        anchor: Anchor.topCenter,
-        priority: 5,
-        textRenderer: TextPaint(
-          style: const TextStyle(fontSize: 20, color: Colors.white),
-        ),
-      );
-
-      final livesTextComponent = TextComponent(
-        text: 'Lives: ${lifeManager.lives}',
-        position: Vector2(size.x - 20, 20),
-        anchor: Anchor.topRight,
-        priority: 5,
-        textRenderer: TextPaint(
-          style: const TextStyle(fontSize: 20, color: Colors.white),
-        ),
-      );
-
-      final levelTextComponent = TextComponent(
-        text: 'Level: ${scoreManager.level}',
-        position: Vector2(20, 20),
-        anchor: Anchor.topLeft,
-        priority: 5,
-        textRenderer: TextPaint(
-          style: const TextStyle(fontSize: 20, color: Colors.white),
-        ),
-      );
-
-      await addAll([
-        scoreTextComponent,
-        livesTextComponent,
-        levelTextComponent,
-      ]);
-
-      if (kDebugMode) {
-        print('NeuralBreakGame: UI Text Components added (STEP 14)');
-      }
-
-      uiManager.initializeTextComponents(
-        scoreTextComponent,
-        livesTextComponent,
-        levelTextComponent,
-      );
-
-      if (kDebugMode) {
-        print(
-            'NeuralBreakGame: UIManager text components initialized (STEP 15)');
-      }
-
-      levelUpMessageText = TextComponent(
-        text: levelUpMessage,
-        position: size / 2,
-        anchor: Anchor.center,
-        priority: 10,
-        textRenderer: TextPaint(
-          style: const TextStyle(fontSize: 48, color: Colors.yellowAccent),
-        ),
-      );
-
-      if (kDebugMode) {
-        print('NeuralBreakGame: Level Up Message Text initialized (STEP 16)');
-      }
-
-      gameOverText = TextComponent(
-        text: gameOverMessage,
-        anchor: Anchor.center,
-        position: size / 2,
-        priority: 10,
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-
-      if (kDebugMode) {
-        print('NeuralBreakGame: Game Over Message Text initialized (STEP 17)');
-      }
+      // Initialize all UI text components (score, lives, level, overlays)
+      await initializeUITextComponents(this);
 
       restartGame();
 
